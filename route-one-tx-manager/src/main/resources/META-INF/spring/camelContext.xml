@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011 FuseSource
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/osgi
+           http://www.springframework.org/schema/osgi/spring-osgi.xsd
+           http://camel.apache.org/schema/spring
+           http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <!-- Transaction Policy used by Camel Transactional Route, refers to the Aries TxManager. -->
+    <bean id="PROPAGATION_REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+       <property name="transactionManager" ref="platformTxManager"/>
+    </bean>
+
+    <bean id="processIncident" class="com.fusesource.examples.persistence.part2.ProcessIncidents">
+       <property name="incidentDao">
+          <osgi:reference interface="com.fusesource.examples.persistence.part2.dao.IncidentDAO"/>
+      </property>
+    </bean>
+
+    <!-- Initialise an Exception to throw it later on -->
+    <bean id="myRandomException" class="java.lang.Exception">
+    	<constructor-arg index="0" value="Random JMS exception" />
+    </bean>
+
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+
+        <dataFormats>
+            <bindy type="Csv" packages="com.fusesource.examples.persistence.part2.model" id="csvReport"/>
+        </dataFormats>
+
+        <route id="file-to-queue">
+        	<from uri="file:datainsert?moveFailed=failed"/>
+            <unmarshal ref="csvReport"/>
+            <split>
+                <simple>${body}</simple>
+                <bean ref="processIncident" method="extract"/>
+                <choice>
+                    <when>
+                        <simple>${file:onlyname} contains 'faildb'</simple>
+                        <!-- Using the activemqNoXA component, which does *not* use a backing XASession -->
+                        <to uri="activemqNoXA:queue:rollback"/>
+                    </when>
+                    <otherwise>
+                        <!-- Using the activemqNoXA component, which does *not* use a backing XASession -->
+                        <to uri="activemqNoXA:queue:incident"/>
+                    </otherwise>
+                </choice>
+                <log message=">>> Incident created in queue : ${body}"/>
+            </split>
+        </route>
+
+        <!-- Route that successfully creates an incident. -->
+        <route id="queue-create-incident">
+            <from uri="activemqNoXA:queue:incident"/>
+           	<!-- The Camel JMS component is designed to recognise Camel's rollback and exception semantics.
+            	 This means that if the exchange is rolled back or if an Exception is thrown, the JMS endpoint will recognise the situation and roll back too.
+            	 As we don't want the exchange to end up in the DLQ, we use a try/catch block to clear the exception and suppress this behaviour. -->
+            <transacted ref="PROPAGATION_REQUIRED"/>
+            <!-- We add stopOnException because if an exception occurs on the registerCall route, the transaction would have already been marked as rollback-only,
+            	 so there is no point in continuing with the DB insertion -->
+            <multicast parallelProcessing="false" stopOnException="true">
+            	<!-- Send a registerCall signal -->
+            	<to uri="direct:registerCall" />
+	            <pipeline>
+		            <log message=">>> Incident received : ${body}"/>
+		            <bean ref="processIncident" method="saveReport"/>
+		            <log message=">>> Record inserted : ${body}"/>
+	            </pipeline>
+            </multicast>
+        </route>
+
+        <!-- Route that creates an incident and then throws an exception to trigger a rollback -->
+        <route id="queue-rollback-incident">
+            <from uri="activemqNoXA:queue:rollback"/>
+            <!-- The Camel JMS component is designed to recognise Camel's rollback and exception semantics.
+            	 This means that if the exchange is rolled back or if an Exception is thrown, the JMS endpoint will recognise the situation and roll back too.
+            	 As we don't want the exchange to end up in the DLQ, we use a try/catch block to clear the exception and suppress this behaviour. -->
+            <transacted ref="PROPAGATION_REQUIRED"/>
+            <!-- We add stopOnException because if an exception occurs on the registerCall route, the transaction would have already been marked as rollback-only,
+            	 so there is no point in continuing with the DB insertion -->
+            <multicast parallelProcessing="false" stopOnException="true">
+                <!-- Send a registerCall signal -->
+            	<to uri="direct:registerCall" />
+	            <pipeline>
+		            <log message=">>> Incident received : ${body}"/>
+		            <bean ref="processIncident" method="saveReport"/>
+					<log message=">>>>>> Throwing exception from Rollback Incident branch!" />
+		            <bean ref="processIncident" method="generateError" />
+		            <log message=">>> Record inserted : ${body}"/>
+	            </pipeline>
+	        </multicast>
+       	</route>
+
+ 		<!-- This route sends an auditing message to a queue. It reuses the same Transaction Policy as above, backed by the JTA Transaction Manager. -->
+		<route id="registerCall">
+			<from uri="direct:registerCall" />
+			<transacted ref="PROPAGATION_REQUIRED" />
+			<transform><simple>Registering ${exchangeId}</simple></transform>
+			<to uri="activemq:queue:registerCall" />
+			<!-- Fail if the filename contains the 'failjms' token -->
+			<filter>
+                <simple>${file:onlyname} contains 'failjms'</simple>
+				<log message=">>>>>> Throwing exception from Register Call branch!" />
+				<throwException ref="myRandomException" />
+			</filter>
+		</route>
+
+    </camelContext>
+
+</beans>

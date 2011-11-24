@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011 FuseSource
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+	       http://camel.apache.org/schema/spring
+           http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <!-- DataSource -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url" value="jdbc:h2:tcp://localhost/~/aggregationReport"/>
+        <property name="username" value="sa"/>
+        <property name="password" value=""/>
+    </bean>
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+    <bean id="jdbcRepository" class="org.apache.camel.processor.aggregate.jdbc.JdbcAggregationRepository">
+        <property name="repositoryName" value="aggregationRepo1"/>
+        <property name="transactionManager" ref="txManager"/>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- aggregate the messages using this strategy -->
+    <bean id="myAggregatorStrategy"
+          class="com.fusesource.examples.persistence.part2.aggregator.MyAggregationStrategy"/>
+
+    <bean id="users" class="com.fusesource.examples.persistence.part2.aggregator.Users"/>
+
+    <camelContext id="camel" trace="true" xmlns="http://camel.apache.org/schema/spring">
+
+        <route id="file-to-queue">
+            <from uri="timer://demo?repeatCount=15&amp;period=2000"/>
+            <bean ref="users" method="getUser"/>
+            <!-- aggregate using our strategy and jdbc repo, and complete when we have 5 messages aggregated -->
+            <aggregate strategyRef="myAggregatorStrategy" aggregationRepositoryRef="jdbcRepository" completionSize="5">
+                <!-- correlate by header with the key id -->
+                <correlationExpression>
+                    <header>id</header>
+                </correlationExpression>
+                <log loggingLevel="INFO" message="%%% Message aggregated - ${body}"/>
+            </aggregate>
+        </route>
+
+    </camelContext>
+
+
+</beans>

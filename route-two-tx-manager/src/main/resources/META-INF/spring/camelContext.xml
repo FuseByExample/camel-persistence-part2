@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011 FuseSource
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/osgi
+           http://www.springframework.org/schema/osgi/spring-osgi.xsd
+           http://camel.apache.org/schema/spring
+           http://camel.apache.org/schema/spring/camel-spring.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Spring JMS TX Manager -->
+    <bean id="jmsTxManager" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="activemqConnectionFactory"/>
+    </bean>
+
+    <!-- ActiveMq Connection Factory -->
+    <bean id="activemqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616" />
+        <!-- Fail fast: no redeliveries -->
+        <property name="redeliveryPolicy">
+		    <bean class="org.apache.activemq.RedeliveryPolicy">
+		        <property name="maximumRedeliveries" value="0"/>
+		    </bean>
+        </property>
+    </bean>
+
+    <!-- ActiveMQ JMS Configuration is defined as Transacted and use Spring JMS TxManager -->
+    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="configuration">
+		    <bean class="org.apache.camel.component.jms.JmsConfiguration">
+		        <property name="connectionFactory" ref="activemqConnectionFactory"/>
+		        <property name="transactionManager" ref="jmsTxManager" />
+		        <property name="transacted" value="true"/>
+		        <property name="cacheLevelName" value="CACHE_NONE"/>
+		    </bean>
+        </property>
+    </bean>
+
+    <!-- JPA Tx Manager -->
+    <osgi:reference id="jpaTxManager" filter="(tx=JPA)" interface="org.springframework.transaction.PlatformTransactionManager"/>
+
+    <!-- Transaction POLICY used by Camel Transactional Route we refer to the Spring JPA TxManager, retreived from the OSGi context -->
+    <bean id="JPA_TRANSACTION" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+       	<property name="transactionManager" ref="jpaTxManager"/>
+    	<property name="propagationBehaviorName" value="PROPAGATION_REQUIRES_NEW" />
+    </bean>
+
+	<!-- Define a second Transaction Policy for JMS.
+		 By using a different transaction manager, we manage to separate transactions -->
+	<bean id="JMS_TRANSACTION" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+    	<property name="transactionManager" ref="jmsTxManager"/>
+    	<property name="propagationBehaviorName" value="PROPAGATION_REQUIRES_NEW" />
+  	</bean>
+
+    <bean id="processIncident" class="com.fusesource.examples.persistence.part2.ProcessIncidents">
+       <property name="incidentDao">
+          <osgi:reference interface="com.fusesource.examples.persistence.part2.dao.IncidentDAO"/>
+      </property>
+    </bean>
+
+    <!-- Initialise an Exception to throw it later on -->
+    <bean id="myRandomException" class="java.lang.Exception">
+    	<constructor-arg index="0" value="Random JMS exception" />
+    </bean>
+
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring" trace="true">
+
+        <dataFormats>
+            <bindy type="Csv" packages="com.fusesource.examples.persistence.part2.model" id="csvReport"/>
+        </dataFormats>
+
+        <route id="file-to-queue">
+        	<from uri="file:datainsert?moveFailed=failed"/>
+            <unmarshal ref="csvReport"/>
+            <split>
+                <simple>${body}</simple>
+                <bean ref="processIncident" method="extract"/>
+                <choice>
+                    <when>
+                        <simple>${file:onlyname} contains 'faildb'</simple>
+                        <to uri="activemq:queue:rollback"/>
+                    </when>
+                    <otherwise>
+                        <to uri="activemq:queue:incident"/>
+                    </otherwise>
+                </choice>
+                <log message=">>> Incident created in queue : ${body}"/>
+            </split>
+        </route>
+
+		<!-- Route that successfully creates an incident in the database -->
+        <route id="queue-create-incident">
+            <from uri="activemq:queue:incident"/>
+            <!-- The Camel JMS component is designed to recognise Camel's rollback and exception semantics.
+            	 This means that if the exchange is rolled back or if an Exception is thrown, the JMS endpoint will recognise the situation and roll back too.
+            	 As we don't want the exchange to end up in the DLQ, we use a try/catch block to clear the exception and suppress this behaviour. -->
+            <doTry>
+            	<to uri="direct:doIncident" />
+	            <doCatch>
+	            	<exception>java.lang.Exception</exception>
+	            	<!-- Do nothing -->
+	            </doCatch>
+            </doTry>
+        </route>
+
+        <!-- Route that performs the actual work to successfully create an incident -->
+        <route id="do-create-incident">
+       		<from uri="direct:doIncident" />
+        	<!-- Transaction policy: Use the JPA TxManager -->
+            <transacted ref="JPA_TRANSACTION" />
+            <!-- Send a registerCall signal -->
+            <multicast parallelProcessing="false">
+            	<to uri="direct:registerCall" />
+	            <pipeline>
+		            <log message=">>> Incident received : ${body}"/>
+		            <bean ref="processIncident" method="saveReport"/>
+		            <log message=">>> Record inserted : ${body}"/>
+	            </pipeline>
+            </multicast>
+        </route>
+
+		<!-- Route that creates an incident in the database and then throws an exception -->
+        <route id="queue-rollback-incident">
+            <from uri="activemq:queue:rollback"/>
+            <!-- The Camel JMS component is designed to recognise Camel's rollback and exception semantics.
+            	 This means that if the exchange is rolled back or if an Exception is thrown, the JMS endpoint will recognise the situation and roll back too.
+            	 We want to suppress this behaviour because we don't want the exchange to end up in the DLQ, hence the try/catch block which clears the exception. -->
+            <doTry>
+            	<to uri="direct:doRollback" />
+	            <doCatch>
+	            	<exception>java.lang.Exception</exception>
+	            	<!-- Do nothing -->
+	            </doCatch>
+            </doTry>
+        </route>
+
+        <!-- Route that performs the actual work to create an incident and then raise an exception causing a rollback -->
+        <route id="do-rollback-incident">
+        	<from uri="direct:doRollback" />
+            <!-- Transaction policy: use the JPA TxManager -->
+            <transacted ref="JPA_TRANSACTION"/>
+            <!-- Send a registerCall signal -->
+            <multicast parallelProcessing="false">
+            	<to uri="direct:registerCall" />
+	            <pipeline>
+		            <log message=">>> Incident received : ${body}"/>
+		            <bean ref="processIncident" method="saveReport"/>
+					<log message=">>>>>> Throwing exception from Rollback Incident branch!" />
+		            <bean ref="processIncident" method="generateError" />
+		            <log message=">>> Record inserted : ${body}"/>
+	            </pipeline>
+	        </multicast>
+        </route>
+
+        <!-- This route sends an auditing message to a queue. -->
+		<route id="registerCall">
+			<from uri="direct:registerCall" />
+			<transacted ref="JMS_TRANSACTION" />
+			<transform><simple>Registering ${exchangeId}</simple></transform>
+			<to uri="activemq:queue:registerCall" />
+			<!-- Fail if the filename contains the 'failjms' token -->
+			<filter>
+                <simple>${file:onlyname} contains 'failjms'</simple>
+				<log message=">>>>>> Throwing exception from Register Call branch!" />
+				<throwException ref="myRandomException" />
+			</filter>
+		</route>
+
+    </camelContext>
+
+</beans>
