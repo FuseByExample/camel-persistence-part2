@@ -14,8 +14,7 @@
   ~    limitations under the License.
   -->
 
-DESCRIPTION
-===========
+# DESCRIPTION
 
 This is the material accompanying the presentation of webinar part II - Transaction Management with Fuse ESB, Camel and Persistent EIPs.
 It covers the different demo made during the talk and is organized like that :
@@ -28,8 +27,7 @@ features = features to be deployed on Fuse ESB
 route-one-tx-manager = Camel routes using one Global Tx Manager (Aries Tx Manager on Fuse ESB)
 route-two-tx-manager = Camel routes using tewo separate Tx Managers (JMS and JDBC)
 
-H2 DATABASE
-===========
+# H2 DATABASE
 
     1) Open a DOS/UNIX console in the folder persistence/database
 
@@ -56,15 +54,13 @@ H2 DATABASE
     Check that the records are well created using the command : SELECT * FROM REPORT.T_INCIDENT;
 
 
-FUSE ESB INSTALLATION
-=====================
+# FUSE ESB INSTALLATION
 
     1) Download and install the Fuse ESB server : http://repo.fusesource.com/nexus/content/repositories/releases/org/apache/servicemix/apache-servicemix/4.4.1-fuse-01-06/
     2) Start Fuse ESB server /bin/karaf.sh
 
 
-Camel Route with 2 Tx Managers
-==============================
+# Camel Route with 2 Tx Managers
 
 This example is comprised of the following projects: datasource, dao, route-two-tx-manager. 
 Ensure you have installed the H2 database and the REPORT schema as per the steps above.
@@ -119,8 +115,7 @@ To install and test, perform the following steps:
            - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
 
     
-Camel route with 1 Global Tx Manager
-====================================
+# Camel route with 1 Global Tx Manager
 
 This example is comprised of the following projects: datasource, dao-jta, route-one-tx-manager. (NOTICE bundle names: dao-*jta* and route-*one*-tx-manager)
 Ensure you have installed the H2 database and the REPORT schema as per the steps above.
@@ -148,8 +143,7 @@ To install and test, assuming that you have previously run the "Camel Route with
            - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
            - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
 
-Idempotent example
-==================
+# Idempotent example
 
     1) Cd idempotent
     2) Execute mvn camel:run
@@ -168,8 +162,7 @@ Idempotent example
        Verify after copying the file that the camel route will not display the following message
        %%% File receive -> csv-one-record.txt
 
-Aggregator example
-==================
+# Aggregator example
 
     1) Cd aggregator
     2) Start H2 console and connect to the DB using the following parameters
