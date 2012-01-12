@@ -147,32 +147,32 @@ To install and test, assuming that you have previously run the "Camel Route with
 
 1. Cd idempotent
 2. Execute mvn camel:run
-    3) Start H2 console and connect to the DB using the following parameters
+3. Start H2 console and connect to the DB using the following parameters
        Driver class = org.h2.Driver
        JDBC URL : jdbc:h2:tcp://localhost/~/idempotentReport
        User name : sa
        Password :
-    4) Enter the following request to verify that no records have been inserted
+4. Enter the following request to verify that no records have been inserted
        SELECT * FROM CAMEL_MESSAGEPROCESSED
-    5) Copy the following file
+5. Copy the following file
        cp cp ../data/csv-one-record.txt datainsert/
-    6) The exchange is not filters out and camel logs that
+6. The exchange is not filters out and camel logs that
        %%% File receive -> csv-one-record.txt
-    7) Shutdown the camel route and restart
+7.Shutdown the camel route and restart
        Verify after copying the file that the camel route will not display the following message
        %%% File receive -> csv-one-record.txt
 
 # Aggregator example
 
-    1) Cd aggregator
-    2) Start H2 console and connect to the DB using the following parameters
+1. Cd aggregator
+2. Start H2 console and connect to the DB using the following parameters
        Driver class = org.h2.Driver
        JDBC URL : jdbc:h2:tcp://localhost/~/aggregationReport
        User name : sa
        Password :
-    3) Create the DB using script in directory sql/init.sql
-    4) Execute mvn camel:run
-    5) Shutdown camel when 2-3 exchanges have been aggregated
+3. Create the DB using script in directory sql/init.sql
+4. Execute mvn camel:run
+5. Shutdown camel when 2-3 exchanges have been aggregated
 
        >>> (file-to-queue) from(timer://demo?period=2000&repeatCount=15) --> ref:users method: getUser <<< Pattern:InOnly, Headers:{firedTime=Wed Nov 23 11:38:51 CET 2011, breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-2}, BodyType:null, Body:[Body is null]
        >>> (file-to-queue) ref:users method: getUser --> aggregate <<< Pattern:InOnly, Headers:{firedTime=Wed Nov 23 11:38:51 CET 2011, breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-2, id=FUSE}, BodyType:String, Body:Charles,
