@@ -138,10 +138,10 @@ To install and test, assuming that you have previously run the "Camel Route with
   
 4. Copy the following files and notice the new behaviours in the second and third cases, in terms of the registerCall queue and the REPORT.T_INCIDENT table:
     
-           - camel-persistence-part2/data/csv-one-record-allok.txt to $SERVICEMIX_HOME/datainsert --> record written in table, new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-allok.txt to $SERVICEMIX_HOME/datainsert --> record written in table, new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
 
 # Idempotent example
 
@@ -179,9 +179,9 @@ To install and test, assuming that you have previously run the "Camel Route with
        >>> (file-to-queue) from(timer://demo?period=2000&repeatCount=15) --> ref:users method: getUser <<< Pattern:InOnly, Headers:{breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-5, firedTime=Wed Nov 23 11:38:53 CET 2011}, BodyType:null, Body:[Body is null]
        >>> (file-to-queue) ref:users method: getUser --> aggregate <<< Pattern:InOnly, Headers:{firedTime=Wed Nov 23 11:38:53 CET 2011, id=FUSE, breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-5}, BodyType:String, Body:Raul,
 
-    6) Verify that a blob object exist in the DB
+6. Verify that a blob object exist in the DB
        SELECT * FROM AGGREGATIONREPO1
-    7) Restart camel route and verify that aggregation process continues
+7. Restart camel route and verify that aggregation process continues
 
 
 
