@@ -25,7 +25,7 @@ It covers the different demo made during the talk and is organized like that :
 - dao-jta = Idem but configured to use JTA
 - features = features to be deployed on Fuse ESB
 - route-one-tx-manager = Camel routes using one Global Tx Manager (Aries Tx Manager on Fuse ESB)
-- route-two-tx-manager = Camel routes using tewo separate Tx Managers (JMS and JDBC)
+- route-two-tx-manager = Camel routes using two separate Tx Managers (JMS and JDBC)
 
 # H2 DATABASE
 
@@ -54,14 +54,14 @@ It covers the different demo made during the talk and is organized like that :
     Check that the records are well created using the command : SELECT * FROM REPORT.T_INCIDENT;
 
 
-# FUSE ESB INSTALLATION AND CONFIGURATION
+# JBOSS FUSE INSTALLATION AND CONFIGURATION
 
-1. Download and install the Fuse ESB : http://www.fusesource.com/downloads
-2. Add the following credentials to the `$FUSE_ESB_HOME>etc/users.properties` file:
+1. Download and install JBoss Fuse: https://access.redhat.com/jbossnetwork/
+2. Add the following credentials to the `$JBOSS_FUSE_HOME>etc/users.properties` file:
 
 		admin=admin,admin
 
-3. Start Fuse ESB server ./bin/karaf
+3. Start JBoss Fuse server ./bin/fuse
 
 
 # Camel Route with 2 Tx Managers
@@ -72,7 +72,7 @@ To install and test, perform the following steps:
 
 1. cd camel-persistence-part2/
 2. Run: mvn clean install
-3. Install the relevant bundles by executing the following command in the FUSE ESB console:
+3. Install the relevant bundles by executing the following command in the JBoss Fuse console:
 	
 		features:addurl mvn:com.fusesource.examples.camel-persistence-part2/persistence/1.0/xml/features
         features:install reportincident-jpa-two
@@ -99,10 +99,10 @@ To install and test, perform the following steps:
        
 7. Copy the following files and notice the effect in the registerCall queue and the REPORT.T_INCIDENT table:
     
-           - camel-persistence-part2/data/csv-one-record-allok.txt to $SERVICEMIX_HOME/datainsert --> record written in table, new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $SERVICEMIX_HOME/datainsert --> record written in table, NO new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+           - camel-persistence-part2/data/csv-one-record-allok.txt to $JBOSS_FUSE_HOME/datainsert --> record written in table, new message on registerCall queue
+           - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $JBOSS_FUSE_HOME/datainsert --> record written in table, NO new message on registerCall queue
+           - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, new message on registerCall queue
+           - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
 
     
 # Camel route with 1 Global Tx Manager
@@ -128,10 +128,10 @@ To install and test, assuming that you have previously run the "Camel Route with
   
 4. Copy the following files and notice the new behaviours in the second and third cases, in terms of the registerCall queue and the REPORT.T_INCIDENT table:
     
-         - camel-persistence-part2/data/csv-one-record-allok.txt to $SERVICEMIX_HOME/datainsert --> record written in table, new message on registerCall queue
-         - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
-         - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
-         - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $SERVICEMIX_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-allok.txt to $JBOSS_FUSE_HOME/datainsert --> record written in table, new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+         - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
 
 # Idempotent example
 
@@ -145,7 +145,7 @@ To install and test, assuming that you have previously run the "Camel Route with
 4. Enter the following request to verify that no records have been inserted
        SELECT * FROM CAMEL_MESSAGEPROCESSED
 5. Copy the following file
-       cp cp ../data/csv-one-record.txt datainsert/
+       cp ../data/csv-one-record.txt datainsert/
 6. The exchange is not filtered out and camel logs that
        %%% File receive -> csv-one-record.txt
 7. Shutdown the camel route and restart
