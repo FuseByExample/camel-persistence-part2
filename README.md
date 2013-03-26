@@ -19,13 +19,13 @@
 This is the material accompanying the presentation of webinar part II - Transaction Management with Fuse ESB, Camel and Persistent EIPs.
 It covers the different demo made during the talk and is organized like that :
 
-aggregator = Camel route project to persist aggregate in H2 DB using JDBCAggregateRepository
-idempotent = Camel route using JPAIdempotentRepository to persist messages already processed
-dao = DAO layer to persist Incident record in H2 DB using OpenJPA
-dao-jta = Idem but configured to use JTA
-features = features to be deployed on Fuse ESB
-route-one-tx-manager = Camel routes using one Global Tx Manager (Aries Tx Manager on Fuse ESB)
-route-two-tx-manager = Camel routes using tewo separate Tx Managers (JMS and JDBC)
+- aggregator = Camel route project to persist aggregate in H2 DB using JDBCAggregateRepository
+- idempotent = Camel route using JPAIdempotentRepository to persist messages already processed
+- dao = DAO layer to persist Incident record in H2 DB using OpenJPA
+- dao-jta = Idem but configured to use JTA
+- features = features to be deployed on Fuse ESB
+- route-one-tx-manager = Camel routes using one Global Tx Manager (Aries Tx Manager on Fuse ESB)
+- route-two-tx-manager = Camel routes using tewo separate Tx Managers (JMS and JDBC)
 
 # H2 DATABASE
 
@@ -54,10 +54,14 @@ route-two-tx-manager = Camel routes using tewo separate Tx Managers (JMS and JDB
     Check that the records are well created using the command : SELECT * FROM REPORT.T_INCIDENT;
 
 
-# FUSE ESB INSTALLATION
+# FUSE ESB INSTALLATION AND CONFIGURATION
 
-1. Download and install the Fuse ESB server : http://repo.fusesource.com/nexus/content/repositories/releases/org/apache/servicemix/apache-servicemix/4.4.1-fuse-01-06/
-2. Start Fuse ESB server /bin/karaf.sh
+1. Download and install the Fuse ESB : http://www.fusesource.com/downloads
+2. Add the following credentials to the `$FUSE_ESB_HOME>etc/users.properties` file:
+
+		admin=admin,admin
+
+3. Start Fuse ESB server ./bin/karaf
 
 
 # Camel Route with 2 Tx Managers
@@ -68,34 +72,20 @@ To install and test, perform the following steps:
 
 1. cd camel-persistence-part2/
 2. Run: mvn clean install
-
-3. ServiceMix offers a simple JNDI implementation for OSGi, but for this example we are interested in leveraging the more sophisticated Aries JNDI
-	   lookup handler. Thus, we need to remove the ServiceMix Naming bundle as it will conflict with the Aries JNDI implementation. Run the following command:
-	   
-	   list | grep -i naming | grep -i servicemix
-	   
-	   Make note of the bundle id (the number inside the leftmost square brackets).
-	   
-	   Run the following command:
-	   
-	   uninstall <bundle-id>
-	   
-	   Restart Karaf (use Ctrl-D to stop it).
-	   
-4. Install the relevant bundles by executing the following command in the FUSE ESB console: 
+3. Install the relevant bundles by executing the following command in the FUSE ESB console:
 	
 		features:addurl mvn:com.fusesource.examples.camel-persistence-part2/persistence/1.0/xml/features
         features:install reportincident-jpa-two
     
     	N.B.: You may safely disregard the openjpa.Runtime Warning if it appears.
     
-5. Execute the "list" command in the ESB shell and check that the following bundles are Active:
+4. Execute the "list" command in the ESB shell and check that the following bundles are Active:
 	
 		[...] [Active     ] [Created     ] [       ] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: Datasource (1.0)
 		[...] [Active     ] [            ] [Started] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: DAO (1.0)
 		[...] [Active     ] [            ] [Started] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: Camel - 2 Tx Manager (1.0)
 	
-6. Start H2 console and connect to the DB using the following parameters
+5. Start H2 console and connect to the DB using the following parameters
 		   Driver class = org.h2.Driver
 		   JDBC URL : jdbc:h2:tcp://localhost/~/reportdb
 		   User name : sa
@@ -103,11 +93,11 @@ To install and test, perform the following steps:
        
        Run the following SQL sentence to ensure that the REPORT.T_INCIDENT is empty: SELECT * FROM REPORT.T_INCIDENT;
        
-7. Launch JConsole (inside $JAVA_HOME/bin) and connect to the local process named "org.apache.karaf.main.Main". Switch to the MBeans tab at the top.
-       On the left pane, expand the org.apache.activemq domain, then navigate to: default > Queue. You will see the incident and rollback queues. 
+6. Launch JConsole (inside $JAVA_HOME/bin) and connect to the local process named "org.apache.karaf.main.Main". Switch to the MBeans tab at the top.
+       On the left pane, expand the org.apache.activemq domain, then navigate to: fusemq > Queue. You will see the incident and rollback queues.
        The registerCall queue will appear when it is first used. For these queues, you will be interested in tracking the EnqueueCount attribute.
        
-8. Copy the following files and notice the effect in the registerCall queue and the REPORT.T_INCIDENT table:
+7. Copy the following files and notice the effect in the registerCall queue and the REPORT.T_INCIDENT table:
     
            - camel-persistence-part2/data/csv-one-record-allok.txt to $SERVICEMIX_HOME/datainsert --> record written in table, new message on registerCall queue
            - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $SERVICEMIX_HOME/datainsert --> record written in table, NO new message on registerCall queue
@@ -156,9 +146,9 @@ To install and test, assuming that you have previously run the "Camel Route with
        SELECT * FROM CAMEL_MESSAGEPROCESSED
 5. Copy the following file
        cp cp ../data/csv-one-record.txt datainsert/
-6. The exchange is not filters out and camel logs that
+6. The exchange is not filtered out and camel logs that
        %%% File receive -> csv-one-record.txt
-7.Shutdown the camel route and restart
+7. Shutdown the camel route and restart
        Verify after copying the file that the camel route will not display the following message
        %%% File receive -> csv-one-record.txt
 
@@ -170,7 +160,7 @@ To install and test, assuming that you have previously run the "Camel Route with
        JDBC URL : jdbc:h2:tcp://localhost/~/aggregationReport
        User name : sa
        Password :
-3. Create the DB using script in directory sql/init.sql
+3. Create the DB using script in directory src/main/resources/sql/init.sql
 4. Execute mvn camel:run
 5. Shutdown camel when 2-3 exchanges have been aggregated
 

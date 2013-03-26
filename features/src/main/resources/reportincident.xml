@@ -18,14 +18,13 @@
     <feature name="reportincident-jpa-two" version="${project.version}">
         <feature version='${camel-version}'>camel-bindy</feature>
         <feature version='${camel-version}'>camel-jpa</feature>
-        <feature version='${servicemix-version}'>camel-activemq</feature>
+        <feature version='${activemq-version}'>activemq-camel</feature>
         <feature>http</feature>
         <feature>jdbc-driver-h2</feature>
         <feature>jndi</feature>
         <feature>transaction</feature>
         <feature>jpa</feature>
         <feature version='${spring-version}'>spring-persistence</feature>
-        <feature version='${openjpa-version}'>openjpa</feature>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/1.6.8_1</bundle>
         <bundle>mvn:com.fusesource.examples.camel-persistence-part2/datasource/${project.version}</bundle>
         <bundle>mvn:com.fusesource.examples.camel-persistence-part2/dao/${project.version}</bundle>
@@ -35,14 +34,13 @@
     <feature name="reportincident-jpa-one" version="${project.version}">
         <feature version='${camel-version}'>camel-bindy</feature>
         <feature version='${camel-version}'>camel-jpa</feature>
-        <feature version='${servicemix-version}'>camel-activemq</feature>
+        <feature version='${activemq-version}'>activemq-camel</feature>
         <feature>http</feature>
         <feature>jdbc-driver-h2</feature>
         <feature>jndi</feature>
         <feature>transaction</feature>
         <feature>jpa</feature>
         <feature version='${spring-version}'>spring-persistence</feature>
-        <feature version='${openjpa-version}'>openjpa</feature>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/1.6.8_1</bundle>
         <bundle>mvn:com.fusesource.examples.camel-persistence-part2/datasource/${project.version}</bundle>
         <bundle>mvn:com.fusesource.examples.camel-persistence-part2/dao-jta/${project.version}</bundle>
