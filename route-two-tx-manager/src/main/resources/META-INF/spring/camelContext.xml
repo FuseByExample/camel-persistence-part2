@@ -38,6 +38,8 @@
     <bean id="activemqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <property name="brokerURL" value="tcp://localhost:61616" />
         <!-- Fail fast: no redeliveries -->
+        <property name="userName" value="admin"/>
+        <property name="password" value="admin"/>
         <property name="redeliveryPolicy">
 		    <bean class="org.apache.activemq.RedeliveryPolicy">
 		        <property name="maximumRedeliveries" value="0"/>

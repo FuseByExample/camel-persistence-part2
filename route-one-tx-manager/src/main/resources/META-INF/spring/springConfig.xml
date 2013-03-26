@@ -34,6 +34,8 @@
 	<!-- Create an XA-aware ActiveMQ Connection Factory -->
     <bean id="activemqConnectionFactoryXa" class="org.apache.activemq.ActiveMQXAConnectionFactory">
         <property name="brokerURL" value="tcp://localhost:61616" />
+        <property name="userName" value="admin"/>
+        <property name="password" value="admin"/>
         <property name="redeliveryPolicy">
             <bean class="org.apache.activemq.RedeliveryPolicy">
 		        <property name="maximumRedeliveries" value="0"/>
@@ -51,6 +53,8 @@
 	<!-- Create a non-XA ActiveMQ Connection Factory -->
 	<bean id="activemqConnectionFactoryNonXa" class="org.apache.activemq.ActiveMQConnectionFactory">
 		<property name="brokerURL" value="tcp://localhost:61616" />
+        <property name="userName" value="admin"/>
+        <property name="password" value="admin"/>
         <property name="redeliveryPolicy">
 	        <bean class="org.apache.activemq.RedeliveryPolicy">
 		        <property name="maximumRedeliveries" value="0"/>
