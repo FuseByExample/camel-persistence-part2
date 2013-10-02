@@ -25,6 +25,7 @@ import java.util.Date;
 
 @CsvRecord(separator = ",")
 @Entity
+@SequenceGenerator(name="incidentSeq", sequenceName="INCIDENT_SEQ")
 @Table(name = "T_INCIDENT")
 public class Incident extends Abstract implements Serializable {
 
@@ -63,7 +64,14 @@ public class Incident extends Abstract implements Serializable {
     private String phone;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="incidentSeq")
+    /* REMOVED as it generates this error
+     *
+     *  There is no row for mapping "com.fusesource.examples.persistence.part2.model.Incident" in sequence table "OPENJPA_SEQUENCE_TABLE", and the attempt to insert a row has apparently failed.
+	at org.apache.openjpa.jdbc.kernel.TableJDBCSeq$AllocateSequenceRunnable.run(TableJDBCSeq.java:911)
+     *
+     * @GeneratedValue(strategy=GenerationType.AUTO)
+     */
     @Column(name = "INCIDENT_ID")
     private long incidentId;
 
