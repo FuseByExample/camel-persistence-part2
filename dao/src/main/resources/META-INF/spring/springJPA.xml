@@ -50,6 +50,7 @@
                 <property name="database" value="HSQL"/>
             </bean>
             -->
+            <!-- H2 -->
             <bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter">
                 <property name="databasePlatform" value="org.apache.openjpa.jdbc.sql.H2Dictionary"/>
                 <property name="showSql" value="true"/>

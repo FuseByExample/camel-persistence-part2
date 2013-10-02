@@ -24,12 +24,12 @@
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
-        <!-- hsql
+        <!-- HSQL
         <properties>
             <property name="openjpa.jdbc.SynchronizeMappings"
                       value="buildSchema(SchemaAction='add,deleteTableContents')"/>
             <property name="openjpa.Log"
-                      value="commons" />
+                      value="DefaultLevel=TRACE, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
             <property name="openjpa.jdbc.DBDictionary"
                       value="hsql(useSchemaName=true)"/>
             <property name="openjpa.jdbc.Schema"
@@ -37,6 +37,7 @@
         </properties>
         -->
 
+         <!-- H2 -->
         <properties>
             <property name="openjpa.jdbc.SynchronizeMappings"
                       value="buildSchema(SchemaAction='add,deleteTableContents')"/>
