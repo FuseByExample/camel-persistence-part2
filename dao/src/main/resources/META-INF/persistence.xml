@@ -42,7 +42,7 @@
             <property name="openjpa.jdbc.SynchronizeMappings"
                       value="buildSchema(SchemaAction='add,deleteTableContents')"/>
             <property name="openjpa.Log"
-                      value="DefaultLevel=TRACE, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
+                      value="DefaultLevel=TRACE, Runtime=TRACE, Tool=TRACE, SQL=TRACE"/>
             <property name="openjpa.jdbc.DBDictionary"
                       value="h2(useSchemaName=true)"/>
             <property name="openjpa.jdbc.Schema"

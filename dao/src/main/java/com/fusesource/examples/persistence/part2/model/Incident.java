@@ -1,19 +1,19 @@
 package com.fusesource.examples.persistence.part2.model;
 
 /**
-  * Copyright 2011 FuseSource
-  *
-  *    Licensed under the Apache License, Version 2.0 (the "License");
-  *    you may not use this file except in compliance with the License.
-  *    You may obtain a copy of the License at
-  *
-  *        http://www.apache.org/licenses/LICENSE-2.0
-  *
-  *    Unless required by applicable law or agreed to in writing, software
-  *    distributed under the License is distributed on an "AS IS" BASIS,
-  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  *    See the License for the specific language governing permissions and
-  *    limitations under the License.
+ * Copyright 2011 FuseSource
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
@@ -25,7 +25,7 @@ import java.util.Date;
 
 @CsvRecord(separator = ",")
 @Entity
-@SequenceGenerator(name="incidentSeq", sequenceName="INCIDENT_SEQ")
+//@SequenceGenerator(name="incidentSeq", sequenceName="INCIDENT_SEQ")
 @Table(name = "T_INCIDENT")
 public class Incident extends Abstract implements Serializable {
 
@@ -64,14 +64,16 @@ public class Incident extends Abstract implements Serializable {
     private String phone;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="incidentSeq")
-    /* REMOVED as it generates this error
+    /*
+     * Error reported with H2 1.3.173
      *
      *  There is no row for mapping "com.fusesource.examples.persistence.part2.model.Incident" in sequence table "OPENJPA_SEQUENCE_TABLE", and the attempt to insert a row has apparently failed.
 	at org.apache.openjpa.jdbc.kernel.TableJDBCSeq$AllocateSequenceRunnable.run(TableJDBCSeq.java:911)
-     *
-     * @GeneratedValue(strategy=GenerationType.AUTO)
+     *  Workaround was to use :
+     *  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="incidentSeq")
+     *  but works randomly !!!
      */
+    @GeneratedValue(strategy=GenerationType.SEQUENCE)
     @Column(name = "INCIDENT_ID")
     private long incidentId;
 
