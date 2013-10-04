@@ -31,15 +31,17 @@ It covers the different demo made during the talk and is organized like that :
 
 1. Open a DOS/UNIX console in the folder persistence/database
 
-2. Download H2 Database (http://www.h2database.com/html/download.html) and install it
+2. Download H2 Database version **1.3.160** (http://www.h2database.com/html/download.html) and not 1.3.17x as we have rollback issues, sequence number creation
 
-3. Start H2 Server using the bat or shell script
+3. and install it
+
+4. Start H2 Server using the bat or shell script
 
     ./h2.sh &
 
     The H2 server is started and to manage the databases from your web browser, simply click on the following url http://localhost:8082/
 
-4. Next create the report database
+5. Next create the report database
 
     In the login.jsp screen, select Generic (H2) - Server
     Add as settings name : Generic H2 (Server) - Webinar
@@ -47,7 +49,7 @@ It covers the different demo made during the talk and is organized like that :
 
     Next click on "connect" and the screen to manage the reportdb appears
 
-5. Create Schema and Tables using the script located in the file camel-persistence-part2/datasource/src/config/hsqldb/reportdb-scripts.sql
+6. Create Schema and Tables using the script located in the file camel-persistence-part2/datasource/src/config/hsqldb/reportdb-scripts.sql
 
     Execute the scripts 1), 2) and 3) defined in this file
 
