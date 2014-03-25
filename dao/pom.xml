@@ -50,6 +50,7 @@
            org.apache.openjpa.persistence.criteria;resolution:=optional;version="[2.0,3.0)",
            org.apache.openjpa.persistence.query;resolution:=optional;version="[2.0,3.0)",
            org.apache.openjpa.util;version=2.1,
+           org.apache.openjpa.jdbc.kernel;version=2.1,
            org.apache.xbean.spring.jndi,
            org.aspectj.lang;resolution:=optional,
            org.springframework.aop;resolution:=optional;version="[2.5,4.0)",

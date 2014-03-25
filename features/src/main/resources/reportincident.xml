@@ -18,7 +18,7 @@
     <feature name="reportincident-jpa-two" version="${project.version}">
         <feature version='${camel-version}'>camel-bindy</feature>
         <feature version='${camel-version}'>camel-jpa</feature>
-        <feature version='${activemq-version}'>activemq-camel</feature>
+        <feature version='${activemq-version}'>activemq</feature>
         <feature>http</feature>
         <feature>jdbc-driver-h2</feature>
         <feature>jndi</feature>
@@ -34,7 +34,7 @@
     <feature name="reportincident-jpa-one" version="${project.version}">
         <feature version='${camel-version}'>camel-bindy</feature>
         <feature version='${camel-version}'>camel-jpa</feature>
-        <feature version='${activemq-version}'>activemq-camel</feature>
+        <feature version='${activemq-version}'>activemq</feature>
         <feature>http</feature>
         <feature>jdbc-driver-h2</feature>
         <feature>jndi</feature>
@@ -48,9 +48,9 @@
     </feature>
 
     <feature name="spring-persistence" version="${spring-version}">
-        <bundle>mvn:org.springframework/spring-orm/${spring-version}</bundle>
-        <bundle>mvn:org.springframework/spring-jdbc/${spring-version}</bundle>
-        <bundle>mvn:org.springframework/spring-aspects/${spring-version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring-version}_1</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring-version}_1</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aspects/${spring-version}_1</bundle>
     </feature>
 
     <feature name="jdbc-driver-hsqldb" version="${hsqldb-version}">
