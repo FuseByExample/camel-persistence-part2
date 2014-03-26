@@ -23,7 +23,7 @@
            http://camel.apache.org/schema/spring/camel-spring.xsd">
 
     <!-- DataSource -->
-    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
         <property name="driverClassName" value="org.h2.Driver"/>
         <property name="url" value="jdbc:h2:tcp://localhost/~/aggregationReport"/>
         <property name="username" value="sa"/>

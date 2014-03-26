@@ -61,16 +61,16 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
         <property name="password" value="${jdbc.password}"/>
     </bean>
 
-    <bean class="org.apache.commons.dbcp.BasicDataSource" id="dataSource">
+    <bean class="org.apache.commons.dbcp2.BasicDataSource" id="dataSource">
         <property name="driverClassName" value="${jdbc.driverClassName}"/>
         <property name="url" value="${jdbc.url}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
         <property name="initialSize" value="${jdbc.initialSize}"/>
-        <property name="maxActive" value="${jdbc.maxActive}"/>
+        <property name="maxTotal" value="${jdbc.maxActive}"/>
         <property name="maxIdle" value="${jdbc.maxIdle}"/>
         <property name="defaultAutoCommit" value="${jdbc.defaultAutoCommit}"/>
-        <property name="removeAbandoned" value="${jdbc.removeAbandoned}"/>
+        <property name="removeAbandonedOnBorrow" value="${jdbc.removeAbandoned}"/>
         <property name="removeAbandonedTimeout"
                   value="${jdbc.removeAbandonedTimeout}"/>
         <property name="logAbandoned" value="${jdbc.logAbandoned}"/>

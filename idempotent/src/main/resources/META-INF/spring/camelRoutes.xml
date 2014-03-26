@@ -23,7 +23,7 @@
            http://camel.apache.org/schema/spring/camel-spring.xsd">
 
     <!-- DataSource -->
-    <bean class="org.apache.commons.dbcp.BasicDataSource" id="dataSource">
+    <bean class="org.apache.commons.dbcp2.BasicDataSource" id="dataSource">
         <property name="driverClassName" value="org.h2.Driver"/>
         <property name="url" value="jdbc:h2:tcp://localhost/~/idempotentReport"/>
         <property name="username" value="sa"/>

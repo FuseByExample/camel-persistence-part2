@@ -60,7 +60,7 @@
     </bean>
 
     <!-- HSQL
-    <bean id="reportdb" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <bean id="reportdb" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
         <property name="url" value="jdbc:hsqldb:hsql://localhost/reportdb"/>
         <property name="username" value="sa"/>
@@ -69,7 +69,7 @@
     -->
 
     <!-- H2 -->
-        <bean id="reportdb" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <bean id="reportdb" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="org.h2.Driver"/>
         <property name="url" value="jdbc:h2:tcp://localhost/~/reportdb"/>
         <property name="username" value="sa"/>

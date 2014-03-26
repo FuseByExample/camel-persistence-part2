@@ -54,21 +54,24 @@
     </feature>
 
     <feature name="jdbc-driver-hsqldb" version="${hsqldb-version}">
-        <bundle>mvn:commons-pool/commons-pool/1.5.5</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/1.4_1</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.2.2_1</bundle>
+        <bundle>mvn:org.apache.commons/commons-pool2/2.2</bundle>
+        <bundle>mvn:org.apache.commons/commons-dbcp2/2.0</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.hsqldb/1.8.0.10_1</bundle>
     </feature>
 
     <feature name="jdbc-driver-h2" version="${h2-version}">
-        <bundle>mvn:commons-pool/commons-pool/1.5.5</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.2.2_1</bundle>
+        <bundle>mvn:org.apache.commons/commons-pool2/2.2</bundle>
         <bundle>wrap:mvn:com.experlog/xapool/1.5.0</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/1.4_1</bundle>
+        <bundle>mvn:org.apache.commons/commons-dbcp2/2.0</bundle>
+        <bundle>mvn:org.osgi/org.osgi.compendium/4.3.1</bundle>
         <bundle>mvn:com.h2database/h2/${h2-version}</bundle>
     </feature>
 
     <feature name="openjpa" version="${openjpa-version}">
         <bundle>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/1.1</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/1.4_1</bundle>
+        <bundle>mvn:org.apache.commons/commons-dbcp2/2.0</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/${openjpa-version}</bundle>
     </feature>
 </features>
