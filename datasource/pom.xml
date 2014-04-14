@@ -20,9 +20,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>com.fusesource.examples</groupId>
-      <artifactId>camel-persistence-part2</artifactId>
-      <version>1.0</version>
+        <groupId>com.fusesource.examples</groupId>
+        <artifactId>camel-persistence-part2</artifactId>
+        <version>1.0</version>
     </parent>
 
     <groupId>com.fusesource.examples.camel-persistence-part2</groupId>
@@ -32,7 +32,12 @@
 
     <properties>
         <osgi-import-pkg>
-            *
+            javax.sql,
+            org.apache.commons.dbcp2,
+            org.enhydra.jdbc.standard,
+            org.osgi.service.blueprint;version="[1.0.0,2.0.0)",
+            org.h2,
+            org.h2.jdbcx
         </osgi-import-pkg>
         <osgi-export-pkg></osgi-export-pkg>
         <osgi-private-pkg></osgi-private-pkg>
@@ -51,5 +56,13 @@
             </resource>
         </resources>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.experlog</groupId>
+            <artifactId>xapool</artifactId>
+            <version>1.6-beta</version>
+        </dependency>
+    </dependencies>
 
 </project>

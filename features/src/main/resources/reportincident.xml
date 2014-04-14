@@ -63,7 +63,7 @@
     <feature name="jdbc-driver-h2" version="${h2-version}">
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.2.2_1</bundle>
         <bundle>mvn:org.apache.commons/commons-pool2/2.2</bundle>
-        <bundle>wrap:mvn:com.experlog/xapool/1.5.0</bundle>
+        <bundle>wrap:mvn:com.experlog/xapool/1.5.0$Import-Package=org.h2,oracle.jdbc.xa;resolution:=optional,oracle.jdbc.xa.client;resolution:=optional,org.enhydra.instantdb.jdbc;resolution:=optional,*</bundle>
         <bundle>mvn:org.apache.commons/commons-dbcp2/2.0</bundle>
         <bundle>mvn:org.osgi/org.osgi.compendium/4.3.1</bundle>
         <bundle>mvn:com.h2database/h2/${h2-version}</bundle>

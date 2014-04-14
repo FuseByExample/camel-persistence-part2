@@ -31,7 +31,11 @@
 
     <context:annotation-config/>
 
-    <context:component-scan base-package="com.fusesource.examples.persistence.part2.dao.impl"/>
+    <!-- without this, sometimes @PersistenceContext annotated field doesn't get autowired -->
+    <bean id="org.springframework.context.annotation.internalPersistenceAnnotationProcessor"
+          class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+    <context:component-scan base-package="com.fusesource.examples.persistence.part2.dao.impl" />
 
     <tx:annotation-driven transaction-manager="txManager"/>
 

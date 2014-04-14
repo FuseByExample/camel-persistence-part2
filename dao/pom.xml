@@ -30,7 +30,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <osgi-import-pkg>
+         <osgi-import-pkg>
            org.h2;resolution:=optional,
            javax.persistence;resolution:=optional;version="[1.1.0,2.1.0)",
            javax.persistence.criteria;resolution:=optional;version="[1.1.0,2.1.0)",
@@ -102,7 +102,6 @@
             <version>${camel-version}</version>
             <scope>compile</scope>
         </dependency>
-
         <!-- Commons -->
         <dependency>
 			<groupId>commons-lang</groupId>
@@ -114,7 +113,6 @@
 			<artifactId>commons-logging</artifactId>
 			<version>${commons-logging-version}</version>
         </dependency>
-
         <!-- OpenJPA -->
         <dependency>
             <groupId>org.apache.openjpa</groupId>
@@ -122,18 +120,24 @@
             <version>${openjpa-version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Sprint Tx -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring-version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
 		<plugins>
-
             <plugin>
                 <!--<groupId>org.codehaus.mojo</groupId>
                 <artifactId>openjpa-maven-plugin</artifactId>
                 <version>${openjpa-plugin-version}</version> -->
                 <groupId>org.apache.openjpa</groupId>
                 <artifactId>openjpa-maven-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>${openjpa-version}</version>
                 <configuration>
                     <includes>**/model/*.class</includes>
                     <addDefaultConstructor>true</addDefaultConstructor>
@@ -148,7 +152,6 @@
                         </goals>
                     </execution>
                 </executions>
-
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.openjpa</groupId>
@@ -161,7 +164,6 @@
                         <version>${commons-logging-version}</version>
                     </dependency>
                 </dependencies>
-
             </plugin>
 		</plugins>
 	</build>

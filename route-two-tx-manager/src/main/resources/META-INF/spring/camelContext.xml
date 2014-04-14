@@ -178,6 +178,10 @@
         <!-- This route sends an auditing message to a queue. -->
 		<route id="registerCall">
 			<from uri="direct:registerCall" />
+            <onException>
+                <exception>java.lang.Exception</exception>
+                <rollback markRollbackOnlyLast="true" />
+            </onException>
 			<transacted ref="JMS_TRANSACTION" />
 			<transform><simple>Registering ${exchangeId}</simple></transform>
 			<to uri="activemq:queue:registerCall" />

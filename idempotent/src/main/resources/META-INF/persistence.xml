@@ -23,7 +23,7 @@
     <class>org.apache.camel.processor.idempotent.jpa.MessageProcessed</class>
 
     <properties>
-      <property name="openjpa.ConnectionURL" value="jdbc:hsqldb:hsql://localhost/idempotentdb;create=true"/>
+      <property name="openjpa.ConnectionURL" value="jdbc:h2:tcp://localhost/~/idempotentReport"/>
       <property name="openjpa.ConnectionDriverName" value="org.h2.Driver"/>
       <property name="openjpa.ConnectionUserName" value="sa"/>
       <property name="openjpa.ConnectionPassword" value=""/>

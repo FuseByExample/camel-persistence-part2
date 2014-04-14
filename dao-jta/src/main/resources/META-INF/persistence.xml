@@ -26,19 +26,21 @@
         <!-- Work without jndi -->
         <jta-data-source>osgi:service/javax.sql.DataSource/(datasource=reportincidentdbXA)</jta-data-source>
         <!-- Required by openJPA to update sequence table outside of Global Tx Management -->
-        <non-jta-data-source>osgi:service/javax.sql.DataSource/(datasource=reportincidentdb)</non-jta-data-source>
+        <!--<non-jta-data-source>osgi:service/javax.sql.DataSource/(datasource=reportincidentdb)</non-jta-data-source>-->
 
         <class>com.fusesource.examples.persistence.part2.model.Incident</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <!-- Openjpa -->
         <properties>
-            <property name="openjpa.jdbc.SynchronizeMappings"
-                      value="buildSchema(SchemaAction='add,deleteTableContents')"/>
+            <!--<property name="openjpa.jdbc.SynchronizeMappings"
+                      value="buildSchema(SchemaAction='add,deleteTableContents')"/>-->
             <!-- HSQL
             <property name="openjpa.jdbc.DBDictionary"
                       value="hsql(useSchemaName=true)"/>
                       -->
+            <property name="openjpa.ConnectionUserName" value="sa"/>
+            <property name="openjpa.ConnectionPassword" value=""/>
             <property name="openjpa.jdbc.DBDictionary"
                       value="h2(useSchemaName=true)"/>
             <property name="openjpa.Log"
