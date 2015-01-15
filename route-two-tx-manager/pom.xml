@@ -42,22 +42,22 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-            <version>${spring-version}</version>
+            <version>${spring.version}</version>
         </dependency>
          <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-all</artifactId>
-            <version>${activemq-version}</version>
+            <version>${activemq.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>${h2-version}</version>
+            <version>${h2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jms</artifactId>
-            <version>${camel-version}</version>
+            <version>${camel.version}</version>
         </dependency>
     </dependencies>
 

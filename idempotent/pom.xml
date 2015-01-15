@@ -24,45 +24,45 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>${spring-version}</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>${h2-version}</version>
+            <version>${h2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
-            <version>2.0</version>
+            <version>${commons.dbcp2.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.openjpa</groupId>
             <artifactId>openjpa</artifactId>
-            <version>${openjpa-version}</version>
+            <version>${openjpa.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jpa</artifactId>
-            <version>${camel-version}</version>
+            <version>${camel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-bindy</artifactId>
-            <version>${camel-version}</version>
+            <version>${camel.version}</version>
         </dependency>
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j-version}</version>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>${log4j-version}</version>
+            <version>${log4j.version}</version>
         </dependency>
     </dependencies>
 
@@ -71,7 +71,7 @@
             <plugin>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-maven-plugin</artifactId>
-                <version>${camel-version}</version>
+                <version>${camel.version}</version>
                 <configuration>
                     <applicationContextUri>META-INF/spring/camelRoutes.xml</applicationContextUri>
                 </configuration>
