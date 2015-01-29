@@ -87,7 +87,6 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jpa</artifactId>
-            <version>${camel.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -99,7 +98,6 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-bindy</artifactId>
-            <version>${camel.version}</version>
             <scope>compile</scope>
         </dependency>
         <!-- Commons -->

@@ -39,9 +39,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <activemq.version>5.10.0.redhat-620063</activemq.version>
-        <build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
-        <camel.version>2.14.0.redhat-620058</camel.version>
+<!--        <activemq.version>5.10.0.redhat-620063</activemq.version>
+        <camel.version>2.14.0.redhat-620058</camel.version>-->
+
         <commons.dbcp2.version>2.0.1</commons.dbcp2.version>
         <commons.lang.version>2.6</commons.lang.version>
         <commons.logging.version>1.2</commons.logging.version>
@@ -49,6 +49,17 @@
         <felix.maven.bundle.plugin.version>2.5.3</felix.maven.bundle.plugin.version>
         <hsqldb.version>1.8.0.10</hsqldb.version>
         <h2.version>1.4.184</h2.version>
+
+        <openjpa.version>2.3.0</openjpa.version>
+        <spring.version>3.2.11.RELEASE</spring.version>
+        <slf4j.version>1.7.10</slf4j.version>
+        <log4j.version>1.2.17</log4j.version>
+
+        <!-- JBoss Fuse BOM Version -->
+        <jboss.fuse.bom.version>6.2.0.redhat-059</jboss.fuse.bom.version>
+
+        <!-- Plugins -->
+        <build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
         <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
         <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
         <maven.compiler.source>1.7</maven.compiler.source>
@@ -60,11 +71,7 @@
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <maven.jar.plugin.version>2.3.2</maven.jar.plugin.version>
 
-        <openjpa.version>2.3.0</openjpa.version>
-        <spring.version>3.2.11.RELEASE</spring.version>
-        <slf4j.version>1.7.10</slf4j.version>
-        <log4j.version>1.2.17</log4j.version>
-
+        <!-- OSGI Properties -->
         <osgi-import-pkg>*</osgi-import-pkg>
         <osgi-export-pkg/>
         <osgi-private-pkg/>
@@ -74,20 +81,19 @@
         <persistence-file>META-INF/persistence.xml</persistence-file>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-spring</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.fuse.bom</groupId>
+                <artifactId>jboss-fuse-parent</artifactId>
+                <version>${jboss.fuse.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-    <!-- Add FUSE repositories for snaphots and releases -->
+    <!-- Add FUSE repositories for snapshots and releases -->
     <pluginRepositories>
         <pluginRepository>
             <id>fusesource.releases</id>

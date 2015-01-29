@@ -24,7 +24,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -46,23 +45,19 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jpa</artifactId>
-            <version>${camel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-bindy</artifactId>
-            <version>${camel.version}</version>
         </dependency>
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
         </dependency>
     </dependencies>
 
@@ -71,7 +66,6 @@
             <plugin>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-maven-plugin</artifactId>
-                <version>${camel.version}</version>
                 <configuration>
                     <applicationContextUri>META-INF/spring/camelRoutes.xml</applicationContextUri>
                 </configuration>
