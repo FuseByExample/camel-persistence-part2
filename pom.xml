@@ -31,7 +31,7 @@
     <modules>
         <module>datasource</module>
         <module>dao</module>
-        <!--<module>dao-jta</module>-->
+        <module>dao-jta</module>
         <!--<module>route-two-tx-manager</module>-->
         <!--<module>route-one-tx-manager</module>-->
         <!--<module>features</module>-->
