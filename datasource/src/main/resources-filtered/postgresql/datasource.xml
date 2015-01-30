@@ -53,8 +53,8 @@
     <bean id="dataSource" class="org.postgresql.ds.PGSimpleDataSource">
         <!-- These properties will be replaced at runtime by Aries-Blueprint -->
         <property name="url" value="[[jdbc.url]]" />
-        <property name="user" value="[[jdbc.user]]" />
-        <property name="password" value="[[jdbc.password]]" />
+        <!--<property name="user" value="[[jdbc.user]]" />-->
+        <!--<property name="password" value="[[jdbc.password]]" />-->
         <property name="applicationName" value="Fuse" />
     </bean>
 
@@ -62,6 +62,7 @@
     <bean id="xaDataSource" class="org.postgresql.xa.PGXADataSource">
         <!-- These properties will be replaced at runtime by Aries-Blueprint -->
         <property name="url" value="[[jdbc.url]]" />
+        <!-- credentials needed for XA recovery -->
         <property name="user" value="[[jdbc.user]]" />
         <property name="password" value="[[jdbc.password]]" />
         <property name="applicationName" value="Fuse" />
@@ -83,6 +84,8 @@
             -->
             <entry key="osgi.jndi.service.name" value="jdbc/reportdb" />
             <entry key="aries.xa.name" value="reportdb" /><!-- Irrelevant for non-XA datasources -->
+            <entry key="aries.xa.username" value="[[jdbc.user]]" />
+            <entry key="aries.xa.password" value="[[jdbc.password]]" />
             <entry key="aries.xa.pooling" value="true" />
             <entry key="aries.xa.poolMaxSize" value="10" />
             <entry key="aries.xa.poolMinSize" value="0" />
@@ -102,6 +105,8 @@
             -->
             <entry key="osgi.jndi.service.name" value="jdbc/reportdbxa" />
             <entry key="aries.xa.name" value="reportdbxa" /><!-- Used for XA recovery -->
+            <entry key="aries.xa.username" value="[[jdbc.user]]" />
+            <entry key="aries.xa.password" value="[[jdbc.password]]" />
             <entry key="aries.xa.pooling" value="true" />
             <entry key="aries.xa.poolMaxSize" value="10" />
             <entry key="aries.xa.poolMinSize" value="0" />

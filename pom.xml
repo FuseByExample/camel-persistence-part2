@@ -30,10 +30,10 @@
 
     <modules>
         <module>datasource</module>
-        <!--<module>dao</module>-->
+        <module>dao</module>
         <!--<module>dao-jta</module>-->
-        <!--<module>route-one-tx-manager</module>-->
         <!--<module>route-two-tx-manager</module>-->
+        <!--<module>route-one-tx-manager</module>-->
         <!--<module>features</module>-->
         <!--<module>idempotent</module>-->
         <!--<module>aggregator</module>-->
@@ -46,6 +46,7 @@
         <jboss.fuse.bom.version>6.2.0.redhat-060</jboss.fuse.bom.version>
         <slf4j.version>1.7.10</slf4j.version>
         <logback.version>1.1.2</logback.version>
+        <karaf.version>2.4.0.redhat-620058</karaf.version>
         <!--<activemq.version>5.10.0.redhat-620065</activemq.version>-->
         <!--<camel.version>2.14.0.redhat-620058</camel.version>-->
         <!--<commons.dbcp2.version>2.0.1</commons.dbcp2.version>-->
@@ -73,7 +74,6 @@
         <osgi-private-pkg />
         <osgi-dynamic-pkg />
         <persistence-file />
-        <!--<persistence-file>META-INF/persistence.xml</persistence-file>-->
     </properties>
 
     <!-- Add FUSE repositories for snaphots and releases -->
@@ -137,6 +137,91 @@
             <url>http://repository.springsource.com/maven/bundles/release</url>
         </repository>
     </repositories-->
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- JBoss Fuse BOM -->
+
+            <dependency>
+                <groupId>org.jboss.fuse.bom</groupId>
+                <artifactId>jboss-fuse-parent</artifactId>
+                <version>${jboss.fuse.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Aries -->
+
+            <dependency>
+                <groupId>org.apache.aries</groupId>
+                <artifactId>org.apache.aries.util-r42</artifactId>
+                <version>1.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.blueprint</groupId>
+                <artifactId>org.apache.aries.blueprint.core</artifactId>
+                <version>1.4.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.transaction</groupId>
+                <artifactId>org.apache.aries.transaction.blueprint</artifactId>
+                <version>1.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jpa</groupId>
+                <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
+                <version>1.0.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jpa</groupId>
+                <artifactId>org.apache.aries.jpa.container</artifactId>
+                <version>1.0.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jpa</groupId>
+                <artifactId>org.apache.aries.jpa.container.context</artifactId>
+                <version>1.0.1</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.openjpa</groupId>
+                <artifactId>openjpa</artifactId>
+                <version>2.3.0</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Karaf JDBC (for debugging) -->
+
+            <dependency>
+                <groupId>org.apache.karaf.jdbc</groupId>
+                <artifactId>org.apache.karaf.jdbc.command</artifactId>
+                <version>${karaf.version}</version>
+            </dependency>
+
+            <!-- Other dependencies -->
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
@@ -235,40 +320,6 @@
         </plugins>
     </build>
 
-    <dependencyManagement>
-        <dependencies>
-
-            <!-- JBoss Fuse BOM -->
-
-            <dependency>
-                <groupId>org.jboss.fuse.bom</groupId>
-                <artifactId>jboss-fuse-parent</artifactId>
-                <version>${jboss.fuse.bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- Other dependencies -->
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
-
-        </dependencies>
-    </dependencyManagement>
-
     <profiles>
         <profile>
             <!--
@@ -299,7 +350,6 @@
                                 <exclude>idempotent/**</exclude>
                                 <exclude>route-two-tx-manager/**</exclude>
                                 <exclude>dao-jta/**</exclude>
-                                <exclude>dao/**</exclude>
                                 <exclude>route-one-tx-manager/**</exclude>
                                 <exclude>aggregator/**</exclude>
                                 <exclude>features/**</exclude>

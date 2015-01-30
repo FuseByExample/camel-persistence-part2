@@ -44,45 +44,6 @@
         <osgi-export-pkg />
     </properties>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources-filtered/${database}</directory>
-                <targetPath>OSGI-INF/blueprint</targetPath>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-        <filters>
-            <filter>src/main/resources/jdbc.properties</filter>
-        </filters>
-        <defaultGoal>compile exec:java</defaultGoal>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>org.jboss.fuse.examples.persistence2.tools.DbInsert</mainClass>
-                    <arguments>
-                        <argument>${database}</argument>
-                    </arguments>
-                    <killAfter>-1</killAfter>
-                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>initdb</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
 
         <!--
@@ -133,6 +94,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Karaf JDBC (for debugging) -->
+
+        <dependency>
+            <groupId>org.apache.karaf.jdbc</groupId>
+            <artifactId>org.apache.karaf.jdbc.command</artifactId>
+        </dependency>
+
         <!-- JavaEE -->
 
         <dependency>
@@ -164,6 +132,45 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources-filtered/${database}</directory>
+                <targetPath>OSGI-INF/blueprint</targetPath>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <filters>
+            <filter>src/main/resources/jdbc.properties</filter>
+        </filters>
+        <defaultGoal>compile exec:java</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>org.jboss.fuse.examples.persistence2.tools.DbInsert</mainClass>
+                    <arguments>
+                        <argument>${database}</argument>
+                    </arguments>
+                    <killAfter>-1</killAfter>
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>initdb</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
