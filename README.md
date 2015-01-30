@@ -39,7 +39,7 @@ We will refer to the root directory of `camel-persistence-part2` project as `$PR
 
 This is the simpliest way to configure local database server, accessible over TCP protocol. H2 database supports XA (two phase commit, 2PC) transactions.
 
-1. Download H2 database from [H2 website](1) (current version: `1.4.185` from 2015-01-16)
+1. Download H2 database from [H2 website](http://www.h2database.com/html/main.html) (current version: `1.4.185` from 2015-01-16)
 2. Unzip the archive to the location of choice (referred to as `$H2_HOME`)
 3. Create `$H2_HOME/databases` which will contain database files
 4. Start H2 server and web console using these shell commands:
@@ -77,7 +77,7 @@ This is the simpliest way to configure local database server, accessible over TC
 
 Derby database also supports XA transactions.
 
-1. Download Derby database from [Derby website](2)
+1. Download Derby database from [Derby website](http://db.apache.org/derby/derby_downloads.html)
 2. Unzip the archive to the location of choice (referred to as `$DERBY_HOME` - please define this environmental variable in shell)
 3. Add `$DERBY_HOME/bin` to `$PATH` environmental variable
 4. Start Derby Server using these shell commands
@@ -118,7 +118,7 @@ Of course you can use existing database instances. The below examples are just h
 
 ## PostgreSQL database
 
-We can use *official* PostgreSQL docker image available at [docker hub](3).
+We can use *official* PostgreSQL docker image available at [docker hub](https://registry.hub.docker.com/_/postgres/).
 You can use any of available methods to access PostgreSQL server (e.g., by mapping ports or connecting to containers IP address directly).
 
 1. Start PostgreSQL server docker container:
@@ -156,7 +156,7 @@ than `max_connections` setting (`100` in the case of `postgres:9.4` image).
 
 ## MariaDB database
 
-We can use *official* MariaDB docker image available at [docker hub](7).
+We can use *official* MariaDB docker image available at [docker hub](https://registry.hub.docker.com/_/mariadb/).
 
 1. Start MariaDB server docker container:
 
@@ -197,7 +197,7 @@ We can use *official* MariaDB docker image available at [docker hub](7).
 
 ## Oracle database
 
-We can use Oracle XE docker image available at [docker hub](6).
+We can use Oracle XE docker image available at [docker hub](https://registry.hub.docker.com/u/wnameless/oracle-xe-11g/).
 You can use any of available methods to access Oracle server (e.g., by mapping ports or connecting to containers IP address directly).
 
 1. Start Oracle server docker container:
@@ -247,7 +247,7 @@ You can use any of available methods to access Oracle server (e.g., by mapping p
 
 ## DB2 database
 
-We can use DB2 Express-C docker image available at [docker hub](4).
+We can use DB2 Express-C docker image available at [docker hub](https://registry.hub.docker.com/u/angoca/db2-instance/).
 You can use any of available methods to access DB2 server (e.g., by mapping ports or connecting to containers IP address directly).
 The correct way of using dockerized DB2 server would be to create child Dockerfile which sets up and runs DB2 instance (with one or more databases),
  but let's do it manually for now.
@@ -325,7 +325,7 @@ The correct way of using dockerized DB2 server would be to create child Dockerfi
 10. Your DB2 database is ready to use.
 
 If you have problems connecting to your DB2 database and receive *DB2 JCC Driver error: Unexpected Throwable caught: null. ERRORCODE=-4228, SQLSTATE=null*, please
-consult the solution [on IBM website](5).
+consult the solution [on IBM website](http://www-01.ibm.com/support/docview.wss?uid=swg21682878).
 
 # JBoss Fuse installation and configuration
 
@@ -338,11 +338,3 @@ consult the solution [on IBM website](5).
 ## Idempotent example
 
 ## Aggregator example
-
-[1]: http://www.h2database.com/html/main.html
-[2]: http://db.apache.org/derby/derby_downloads.html
-[3]: https://registry.hub.docker.com/_/postgres/
-[4]: https://registry.hub.docker.com/u/angoca/db2-instance/
-[5]: http://www-01.ibm.com/support/docview.wss?uid=swg21682878
-[6]: https://registry.hub.docker.com/u/wnameless/oracle-xe-11g/
-[7]: https://registry.hub.docker.com/_/mariadb/
