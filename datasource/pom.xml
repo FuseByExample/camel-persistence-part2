@@ -1,68 +1,361 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2011 FuseSource
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  -->
+
+    Copyright 2005-2015 Red Hat, Inc.
+
+    Red Hat licenses this file to you under the Apache License, version
+    2.0 (the "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+    implied.  See the License for the specific language governing
+    permissions and limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.fusesource.examples</groupId>
+        <groupId>org.jboss.fuse.examples</groupId>
         <artifactId>camel-persistence-part2</artifactId>
-        <version>1.0</version>
+        <version>6.2</version>
     </parent>
 
-    <groupId>com.fusesource.examples.camel-persistence-part2</groupId>
+    <groupId>org.jboss.fuse.examples.camel-persistence-part2</groupId>
     <artifactId>datasource</artifactId>
-    <name>FuseSource :: Examples :: Fuse ESB &amp; Persistence :: Datasource</name>
     <packaging>bundle</packaging>
 
+    <name>FuseSource :: Examples :: Fuse ESB &amp; Persistence :: Datasource</name>
+
     <properties>
+        <database />
         <osgi-import-pkg>
             javax.sql,
-            org.apache.commons.dbcp2,
-            org.enhydra.jdbc.standard,
-            org.osgi.service.blueprint;version="[1.0.0,2.0.0)",
-            org.h2,
-            org.h2.jdbcx
+            org.postgresql,
+            org.postgresql.ds,
+            org.postgresql.xa
         </osgi-import-pkg>
-        <osgi-export-pkg></osgi-export-pkg>
-        <osgi-private-pkg></osgi-private-pkg>
-        <osgi-dynamic-pkg></osgi-dynamic-pkg>
+        <osgi-export-pkg />
     </properties>
 
     <build>
         <resources>
             <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources-filtered/${database}</directory>
                 <targetPath>OSGI-INF/blueprint</targetPath>
-                <filtering>false</filtering>
-                <directory>${basedir}/src/main/resources/OSGI-INF/blueprint</directory>
-                <includes>
-                    <include>*.xml</include>
-                </includes>
+                <filtering>true</filtering>
             </resource>
         </resources>
+        <filters>
+            <filter>src/main/resources/jdbc.properties</filter>
+        </filters>
+        <defaultGoal>compile exec:java</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>org.jboss.fuse.examples.persistence2.tools.DbInsert</mainClass>
+                    <arguments>
+                        <argument>${database}</argument>
+                    </arguments>
+                    <killAfter>-1</killAfter>
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>initdb</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencies>
+
+        <!--
+            commons-dbcp2 connection pool: http://commons.apache.org/proper/commons-dbcp/
+            Contains OSGi manifests
+            Pooling datasources:
+             - org.apache.commons.dbcp2.PoolingDataSource (needs explicit configuration of org.apache.commons.pool2.ObjectPool)
+             - org.apache.commons.dbcp2.BasicDataSource (uses the above with org.apache.commons.pool2.ObjectPool configured)
+            XA Enlisting, pooling datasources:
+             - org.apache.commons.dbcp2.managed.ManagedDataSource (needs explicit configuration of org.apache.commons.pool2.ObjectPool)
+             - org.apache.commons.dbcp2.managed.BasicManagedDataSource (uses the above with org.apache.commons.pool2.ObjectPool configured)
+        -->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.commons</groupId>-->
+            <!--<artifactId>commons-dbcp2</artifactId>-->
+            <!--<version>2.0.1</version>-->
+            <!--<exclusions>-->
+                <!--<exclusion>-->
+                    <!--<groupId>commons-logging</groupId>-->
+                    <!--<artifactId>commons-logging</artifactId>-->
+                <!--</exclusion>-->
+            <!--</exclusions>-->
+        <!--</dependency>-->
+
+        <!-- Aries -->
+
         <dependency>
-            <groupId>com.experlog</groupId>
-            <artifactId>xapool</artifactId>
-            <version>${experlog.xapool.version}</version>
+            <groupId>org.apache.aries.transaction</groupId>
+            <artifactId>org.apache.aries.transaction.jdbc</artifactId>
+            <version>2.1.0</version>
+            <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.aries.transaction</groupId>
+            <artifactId>org.apache.aries.transaction.manager</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.components</groupId>
+            <artifactId>geronimo-connector</artifactId>
+            <version>3.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JavaEE -->
+
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jta_1.1_spec</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-j2ee-connector_1.6_spec</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Other dependencies -->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>postgresql</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <database>postgresql</database>
+            </properties>
+            <dependencies>
+                <!--
+                    PostgreSQL:
+                    javax.sql.DataSource: org.postgresql.ds.PGSimpleDataSource, org.postgresql.ds.PGPoolingDataSource
+                    javax.sql.XADataSource: org.postgresql.xa.PGXADataSource
+                    javax.sql.ConnectionPoolDataSource: org.postgresql.ds.PGConnectionPoolDataSource
+                -->
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <version>9.3-1102-jdbc41</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>mariadb</id>
+            <properties>
+                <database>mariadb</database>
+            </properties>
+            <dependencies>
+                <!--
+                    MariaDB:
+                    javax.sql.DataSource: org.mariadb.jdbc.MySQLDataSource
+                    javax.sql.XADataSource: org.mariadb.jdbc.MySQLDataSource
+                    javax.sql.ConnectionPoolDataSource: org.mariadb.jdbc.MySQLDataSource
+                -->
+                <dependency>
+                    <groupId>org.mariadb.jdbc</groupId>
+                    <artifactId>mariadb-java-client</artifactId>
+                    <version>1.1.7</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>_mysql</id> <!-- TODO -->
+            <properties>
+                <database>mysql</database>
+            </properties>
+            <dependencies>
+                <!--
+                    MySQL:
+                    javax.sql.DataSource: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+                    javax.sql.XADataSource: com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
+                    javax.sql.ConnectionPoolDataSource: com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
+                -->
+                <dependency>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                    <version>5.1.34</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>h2</id>
+            <properties>
+                <database>h2</database>
+            </properties>
+            <dependencies>
+                <!--
+                    H2:
+                    javax.sql.DataSource: org.h2.jdbcx.JdbcDataSource, org.h2.jdbcx.JdbcConnectionPool
+                    javax.sql.XADataSource: org.h2.jdbcx.JdbcDataSource (same as above)
+                    javax.sql.ConnectionPoolDataSource: org.h2.jdbcx.JdbcDataSource (same as above)
+                -->
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <version>1.4.185</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>_hsqldb</id> <!-- TODO -->
+            <properties>
+                <database>hsqldb</database>
+            </properties>
+            <dependencies>
+                <!--
+                    HSQLDB:
+                    javax.sql.DataSource: org.hsqldb.jdbc.JDBCDataSource, org.hsqldb.jdbc.JDBCPool
+                    javax.sql.XADataSource: org.hsqldb.jdbc.pool.JDBCXADataSource
+                    javax.sql.ConnectionPoolDataSource: org.hsqldb.jdbc.pool.JDBCPooledDataSource
+                -->
+                <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <version>2.3.2</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>derby</id>
+            <properties>
+                <database>derby</database>
+            </properties>
+            <dependencies>
+                <!--
+                    Derby:
+                    javax.sql.DataSource: org.apache.derby.jdbc.ClientDataSource
+                    javax.sql.XADataSource: org.apache.derby.jdbc.ClientXADataSource
+                    javax.sql.ConnectionPoolDataSource: org.apache.derby.jdbc.ClientConnectionPoolDataSource
+                -->
+                <dependency>
+                    <groupId>org.apache.derby</groupId>
+                    <artifactId>derbyclient</artifactId>
+                    <version>10.11.1.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>db2</id>
+            <properties>
+                <database>db2</database>
+            </properties>
+            <dependencies>
+                <!--
+                    DB2: http://www-01.ibm.com/support/docview.wss?uid=swg21363866 (DB2 JDBC Driver Versions and Downloads)
+                    javax.sql.DataSource: com.ibm.db2.jcc.DB2DataSource (deprecated), com.ibm.db2.jcc.DB2SimpleDataSource
+                    javax.sql.XADataSource: com.ibm.db2.jcc.DB2XADataSource
+                    javax.sql.ConnectionPoolDataSource: com.ibm.db2.jcc.DB2ConnectionPoolDataSource, com.ibm.db2.jcc.DB2XADataSource (same as above)
+                -->
+                <!-- SHA1(db2jcc4-4.19.26.jar)= 9344d4fd41d6511f2d1d1deb7759056495b3a39b -->
+                <dependency>
+                    <groupId>com.ibm.db2</groupId>
+                    <artifactId>db2jcc4</artifactId>
+                    <version>4.19.26</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>oracle</id>
+            <properties>
+                <database>oracle</database>
+            </properties>
+            <dependencies>
+                <!--
+                    Oracle: http://www.oracle.com/technetwork/database/features/jdbc/index.html
+                    javax.sql.DataSource: oracle.jdbc.pool.OracleDataSource
+                    javax.sql.XADataSource: oracle.jdbc.xa.OracleXADataSource, oracle.jdbc.xa.client.OracleXADataSource
+                    javax.sql.ConnectionPoolDataSource: oracle.jdbc.pool.OracleConnectionPoolDataSource
+
+                    Oracle Universal Connection Pool:
+                    Factory: oracle.ucp.jdbc.PoolDataSourceFactory
+                    javax.sql.DataSource: oracle.ucp.jdbc.PoolDataSourceImpl
+                    javax.sql.XADataSource: oracle.ucp.jdbc.PoolXADataSourceImpl
+                    javax.sql.ConnectionPoolDataSource: none
+                -->
+                <!-- SHA1(ojdbc7_g-12.1.0.2.jar)= fecab09de23a6e44c027b22aa098b6aaf69b06ca -->
+                <!-- SHA1(ucp-12.1.0.2.jar)= ef4f2f99b07ee26673be62bbdccce78b0209042c -->
+                <dependency>
+                    <groupId>com.oracle</groupId>
+                    <artifactId>ojdbc7_g</artifactId>
+                    <version>12.1.0.2</version>
+                </dependency>
+                <!--<dependency>-->
+                    <!--<groupId>com.oracle</groupId>-->
+                    <!--<artifactId>ucp</artifactId>-->
+                    <!--<version>12.1.0.2</version>-->
+                <!--</dependency>-->
+            </dependencies>
+        </profile>
+        <profile>
+            <id>_mssql</id> <!-- TODO -->
+            <properties>
+                <database>mssql</database>
+            </properties>
+            <dependencies>
+                <!--
+                    MS SQL Server: https://msdn.microsoft.com/en-us/sqlserver/aa937724.aspx (Microsoft JDBC Driver for SQL Server)
+                    javax.sql.DataSource: com.microsoft.sqlserver.jdbc.SQLServerDataSource
+                    javax.sql.XADataSource: com.microsoft.sqlserver.jdbc.SQLServerXADataSource
+                    javax.sql.ConnectionPoolDataSource: com.microsoft.sqlserver.jdbc.SQLServerConnectionPoolDataSource
+                -->
+                <!-- SHA1(sqljdbc41-4.1.5605.100.jar)= d9bb0d6c413a182e4242e22ccfe689542b3924e2 -->
+                <dependency>
+                    <groupId>com.microsoft.sqlserver</groupId>
+                    <artifactId>sqljdbc41</artifactId>
+                    <version>4.1.5605.100</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>

@@ -1,183 +1,348 @@
 <!--
-  ~ Copyright 2011 FuseSource
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  -->
 
-# DESCRIPTION
+    Copyright 2005-2015 Red Hat, Inc.
+
+    Red Hat licenses this file to you under the Apache License, version
+    2.0 (the "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+    implied.  See the License for the specific language governing
+    permissions and limitations under the License.
+
+-->
+# Description
 
 This is the material accompanying the presentation of webinar part II - Transaction Management with Fuse ESB, Camel and Persistent EIPs.
-It covers the different demo made during the talk and is organized like that :
+It covers the different demos made during the talk and is organized in the following projects:
 
-- aggregator = Camel route project to persist aggregate in H2 DB using JDBCAggregateRepository
-- idempotent = Camel route using JPAIdempotentRepository to persist messages already processed
-- dao = DAO layer to persist Incident record in H2 DB using OpenJPA
-- dao-jta = Idem but configured to use JTA
-- features = features to be deployed on Fuse ESB
-- route-one-tx-manager = Camel routes using one Global Tx Manager (Aries Tx Manager on Fuse ESB)
-- route-two-tx-manager = Camel routes using two separate Tx Managers (JMS and JDBC)
+* `datasource`: OSGi bundle project containing datasource definitions - both database specific and generic datasources providing pooling and JTA capabilities
+* `dao`:
+* `dao-jta`:
+* `route-two-tx-managers`:
+* `route-one-tx-manager`:
+* `aggregator`:
+* `idempotent`:
+* `features`: Karaf features to be deployed on JBoss Fuse
 
-# H2 DATABASE
+# Initial setup
 
-1. Open a DOS/UNIX console in the folder persistence/database
+We will refer to the root directory of `camel-persistence-part2` project as `$PROJECT_HOME`.
 
-2. Download H2 Database version **1.3.160** (http://www.h2database.com/html/download.html) and not 1.3.17x as we have rollback issues, sequence number creation
+# Setting up standalone databases
 
-3. and install it
+## H2 Database
 
-4. Start H2 Server using the bat or shell script
+This is the simpliest way to configure local database server, accessible over TCP protocol. H2 database supports XA (two phase commit, 2PC) transactions.
 
-    ./h2.sh &
+1. Download H2 database from [H2 website](1) (current version: `1.4.185` from 2015-01-16)
+2. Unzip the archive to the location of choice (referred to as `$H2_HOME`)
+3. Create `$H2_HOME/databases` which will contain database files
+4. Start H2 server and web console using these shell commands:
 
-    The H2 server is started and to manage the databases from your web browser, simply click on the following url http://localhost:8082/
+        $ cd $H2_HOME
+        $ java -cp bin/h2*.jar org.h2.tools.Server -tcp -web -baseDir databases
 
-5. Next create the report database
+    This will start H2 database (TCP port 9092) and management console (http://localhost:8082) URL.
 
-    In the login.jsp screen, select Generic (H2) - Server
-    Add as settings name : Generic H2 (Server) - Webinar
-    and modify the JDBC ur las such : jdbc:h2:tcp://localhost/~/reportdb
+    Setting `-baseDir` controls the location of created databases.
 
-    Next click on "connect" and the screen to manage the reportdb appears
+5. Create `reportdb` database from the management console (http://localhost:8082):
 
-6. Create Schema and Tables using the script located in the file camel-persistence-part2/datasource/src/config/hsqldb/reportdb-scripts.sql
+    1. On the `login.jsp` screen, select *Generic H2 (Server)*
+    2. Change *Setting Name* to `H2 Server - report DB`
+    3. Change *JDBC URL* to `jdbc:h2:tcp://localhost/./reportdb` (after changing `~` to `.`, database will be created under `$H2_HOME/databases`)
+    4. Change *User Name* and *Password* to `fuse`
+    5. Click *Test connection* (this will create the databse files, e.g., `$H2_HOME/databases/reportdb.mv`)
 
-    Execute the scripts 1), 2) and 3) defined in this file
+6. Initialize database `reportdb` by creating schema, table and populating the table with data.
 
-    Check that the records are well created using the command : SELECT * FROM REPORT.T_INCIDENT;
+    Simply run:
+
+        $ cd $PROJECT_HOME/datasource
+        $ mvn -Ph2
+
+    This will produce standard Maven output with single information:
+
+        [INFO] --- exec-maven-plugin:1.3.2:java (default-cli) @ datasource ---
+        12:07:34.116 INFO  [o.j.f.e.p.t.DbInsert] : Database h2 initialized successfully
+
+7. Your H2 database is ready to use.
+
+## Derby Database
+
+Derby database also supports XA transactions.
+
+1. Download Derby database from [Derby website](2)
+2. Unzip the archive to the location of choice (referred to as `$DERBY_HOME` - please define this environmental variable in shell)
+3. Add `$DERBY_HOME/bin` to `$PATH` environmental variable
+4. Start Derby Server using these shell commands
+
+        $ cd $DERBY_HOME
+        $ mkdir databases
+        $ cd databases
+        $ java -jar $DERBY_HOME/lib/derbyrun.jar server start
+
+    This will start Derby database (TCP port 1527).
+
+5. Create `reportdb` database using `ij` command line utility:
+
+        $ ij
+        ij version 10.11
+        ij> connect 'jdbc:derby://localhost/reportdb;create=true' user 'fuse' password 'fuse';
+
+    This will create `reportdb` directory in `$DERBY_HOME/databases/reportdb`
+
+6. Initialize database `reportdb` by creating schema, table and populating the table with data.
+
+    Simply run:
+
+        $ cd $PROJECT_HOME/datasource
+        $ mvn -Pderby
+
+    This will produce standard Maven output with single information:
+
+        [INFO] --- exec-maven-plugin:1.3.2:java (default-cli) @ datasource ---
+        10:56:34.550 INFO  [o.j.f.e.p.t.DbInsert] : Database derby initialized successfully
+
+7. Your Derby database is ready to use.
+
+# Setting up docker-based databases
+
+To perform tests in more realistic environments, we can leverage the power of docker to run more advanced database servers.
+Of course you can use existing database instances. The below examples are just here for completeness.
+
+## PostgreSQL database
+
+We can use *official* PostgreSQL docker image available at [docker hub](3).
+You can use any of available methods to access PostgreSQL server (e.g., by mapping ports or connecting to containers IP address directly).
+
+1. Start PostgreSQL server docker container:
+
+        $ docker run -d --name fuse-postgresql-server -e POSTGRES_USER=fuse -e POSTGRES_PASSWORD=fuse -p 5432:5432 postgres:9.4
+
+2. Create `reportdb` database by from the `fuse-postgresql-server` container:
+
+        $ docker exec -ti fuse-postgresql-server /bin/bash
+        root@3e37b4b579c7:/# psql -U fuse -d fuse
+        psql (9.4.0)
+        Type "help" for help.
+        fuse=# create database reportdb owner fuse encoding 'utf8';
+        CREATE DATABASE
+        fuse=# \q
+
+3. Initialize database `reportdb` by creating schema, table and populating the table with data.
+
+    Simply run:
+
+        $ cd $PROJECT_HOME/datasource
+        $ mvn -Ppostgresql
+
+    This will produce standard Maven output with single information:
+
+        [INFO] --- exec-maven-plugin:1.3.2:java (default-cli) @ datasource ---
+        14:32:57.171 INFO  [o.j.f.e.p.t.DbInsert] : Database postgresql initialized successfully
+
+4. Configure PostgreSQL database to allow XA transactions by setting `max_prepared_transactions` to the value equal or greater
+than `max_connections` setting (`100` in the case of `postgres:9.4` image).
+
+        root@b052efff5a53:/# sed -i 's/^#max_prepared_transactions = 0/max_prepared_transactions = 200/' /var/lib/postgresql/data/postgresql.conf
+
+5. Restart `fuse-postgresql-server` container. Your PostgreSQL database is ready to use.
+
+## MariaDB database
+
+We can use *official* MariaDB docker image available at [docker hub](7).
+
+1. Start MariaDB server docker container:
+
+        $ docker run -d --name fuse-mariadb-server -e MYSQL_ROOT_PASSWORD=fuse -p 3306:3306 mariadb:10.0.15
+
+2. Create user `fuse` from the `fuse-mariadb-server` container:
+
+        root@64f9b9714ae1:/# TERM=xterm mysql -h localhost -uroot -pfuse
+        Welcome to the MariaDB monitor.  Commands end with ; or \g.
+        ...
+        MariaDB [(none)]> create user 'fuse'@'%' identified by 'fuse';
+        Query OK, 0 rows affected (0.00 sec)
+
+2. Create `report` database (`CREATE SCHEMA` is a synonym for `CREATE DATABASE` in MariaDB/MySQL) and set correct grants:
+
+        MariaDB [(none)]> create database report;
+        Query OK, 1 row affected (0.00 sec)
+
+        MariaDB [(none)]> grant all privileges on report.* to 'fuse'@'%';
+        Query OK, 0 rows affected (0.00 sec)
+
+        MariaDB [(none)]> flush privileges;
+        Query OK, 0 rows affected (0.00 sec)
+
+3. Initialize database `report` by creating table and populating the table with data.
+
+    Simply run:
+
+        $ cd $PROJECT_HOME/datasource
+        $ mvn -Pmariadb
+
+    This will produce standard Maven output with single information:
+
+        [INFO] --- exec-maven-plugin:1.3.2:java (default-cli) @ datasource ---
+        12:38:39.986 INFO  [o.j.f.e.p.t.DbInsert] : Database mariadb initialized successfully
+
+5. Your MariaDB database is ready to use.
+
+## Oracle database
+
+We can use Oracle XE docker image available at [docker hub](6).
+You can use any of available methods to access Oracle server (e.g., by mapping ports or connecting to containers IP address directly).
+
+1. Start Oracle server docker container:
+
+        $ docker run -d --name fuse-oracle-server -p 1521:1521 wnameless/oracle-xe-11g
+
+2. Run bash in `fuse-oracle-server` container:
+
+        $ docker exec -ti fuse-oracle-server /bin/bash
+
+3. Connect to Oracle XE database and create `report` user (which is synonym to *schema* in Oracle):
+
+        root@67eb9c9cc8ca:/# sqlplus sys/oracle@localhost as sysdba
+
+        SQL*Plus: Release 11.2.0.2.0 Production on Wed Jan 28 09:09:37 2015
+
+        Copyright (c) 1982, 2011, Oracle.  All rights reserved.
 
 
-# JBOSS FUSE INSTALLATION AND CONFIGURATION
+        Connected to:
+        Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
 
-1. Download and install JBoss Fuse: https://access.redhat.com/jbossnetwork/
-2. Add the following credentials to the `$JBOSS_FUSE_HOME>etc/users.properties` file:
+        SQL> create user report identified by report;
 
-        admin=admin,admin
+        User created.
 
-3. Start JBoss Fuse server ./bin/fuse
+        SQL> grant connect, resource, create view to report;
 
+        Grant succeeded.
 
-# Camel Route with 2 Tx Managers
+        SQL> quit
+        Disconnected from Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
 
-This example is comprised of the following projects: datasource, dao, route-two-tx-manager.
-Ensure you have installed the H2 database and the REPORT schema as per the steps above.
-To install and test, perform the following steps:
+4. Initialize database `xe` as user (= Oracle schema) `report` by table and populating the table with data.
 
-1. cd camel-persistence-part2/
-2. Run: mvn clean install
-3. Install the relevant bundles by executing the following command in the JBoss Fuse console:
+    Simply run:
 
-        features:addurl mvn:com.fusesource.examples.camel-persistence-part2/persistence/1.0/xml/features
-        features:install -r reportincident-jpa-two
-        osgi:refresh
+        $ cd $PROJECT_HOME/datasource
+        $ mvn -Poracle
 
-N.B.: You may safely disregard the openjpa.Runtime Warning if it appears.
+    This will produce standard Maven output with single information:
 
-4. Execute the "list" command in the ESB shell and check that the following bundles are Active:
+        [INFO] --- exec-maven-plugin:1.3.2:java (default-cli) @ datasource ---
+        11:23:36.991 INFO  [o.j.f.e.p.t.DbInsert] : Database oracle initialized successfully
 
-        [...] [Active     ] [Created     ] [       ] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: Datasource (1.0)
-        [...] [Active     ] [            ] [Started] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: DAO (1.0)
-        [...] [Active     ] [            ] [Started] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: Camel - 2 Tx Manager (1.0)
+10. Your Oracle database is ready to use.
 
-5. Start H2 console and connect to the DB using the following parameters
-           Driver class = org.h2.Driver
-           JDBC URL : jdbc:h2:tcp://localhost/~/reportdb
-           User name : sa
-           Password :
+## DB2 database
 
-       Run the following SQL sentence to ensure that the `REPORT.T_INCIDENT` is empty: `SELECT * FROM REPORT.T_INCIDENT`;
+We can use DB2 Express-C docker image available at [docker hub](4).
+You can use any of available methods to access DB2 server (e.g., by mapping ports or connecting to containers IP address directly).
+The correct way of using dockerized DB2 server would be to create child Dockerfile which sets up and runs DB2 instance (with one or more databases),
+ but let's do it manually for now.
 
-6. Launch JConsole (inside $JAVA_HOME/bin) and connect to the local process named "org.apache.karaf.main.Main". Switch to the MBeans tab at the top.
-       On the left pane, expand the org.apache.activemq domain, then navigate to: amq > Queue. You will see the `incident` and `rollback` queues.
-       The `registerCall` queue will appear when it is first used. For these queues, you will be interested in tracking the EnqueueCount attribute.
+1. Start DB2 server docker container:
 
-7. Copy the following files and notice the effect in the `registerCall` queue and the `REPORT.T_INCIDENT` table:
+        $ docker run -dit --privileged=true --name fuse-db2-server -p 50000:50000 angoca/db2-instance /bin/bash
+        root@a41e1162442f:/tmp/db2_conf#
 
-           - camel-persistence-part2/data/csv-one-record-allok.txt to $JBOSS_FUSE_HOME/datainsert --> record written in table, new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $JBOSS_FUSE_HOME/datainsert --> record written in table, NO new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, new message on registerCall queue
-           - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+    The container will run daemonized, but it runs only `/bin/bash` process. We'll handle it later.
 
+2. Run bash in `fuse-db2-server` container:
 
-# Camel route with 1 Global Tx Manager
+        $ docker exec -ti fuse-db2-server /bin/bash
+        root@e8c7f3714145:/tmp/db2_conf#
 
-This example is comprised of the following projects: datasource, dao-jta, route-one-tx-manager. (NOTICE bundle names: dao-*jta* and route-*one*-tx-manager)
-Ensure you have installed the H2 database and the REPORT schema as per the steps above.
+    We are now in the directory which contains prepared response file, which may be used to create DB2 instance listening
+    on port TCP/50000.
 
-To install and test, assuming that you have previously run the "Camel Route with 2 Tx Managers" example above:
+3. Create DB2 instance using prepared response file:
 
-1. First uninstall the reportincident-jpa-two feature:
+        root@2286a6283768:/tmp/db2_conf# ${DB2_DIR}/instance/db2isetup -r ${DB2_CONF}/${DB2_RESP_FILE}
+        The execution completed successfully.
 
-          features:uninstall reportincident-jpa-two
+        For more information see the DB2 installation log at "/tmp/db2isetup.log".
 
-2. Install the reportincident-jpa-one feature:
+4. Switch to `db2inst1` user (which has correct environment configured):
 
-        features:install -r reportincident-jpa-one
-        osgi:refresh
+        root@2286a6283768:/tmp/db2_conf# su - db2inst1
+        db2inst1@2286a6283768:~$
 
-3. Execute the "list" command in the ESB shell and check that the following bundles are Active:
+5. Start`db2inst1` DB2 instance:
 
-        [...] [Active     ] [Created     ] [       ] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: Datasource (1.0)
-        [...] [Active     ] [            ] [       ] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: DAO - JTA (1.0)
-        [...] [Active     ] [            ] [Started] [   60] FuseSource :: Examples :: Fuse ESB & Persistence :: Camel - 1 Tx Manager (1.0)
+        db2inst1@2286a6283768:~$ db2start
+        SQL1063N  DB2START processing was successful.
 
-4. Copy the following files and notice the new behaviours in the second and third cases, in terms of the registerCall queue and the REPORT.T_INCIDENT table:
+6. Create `reportdb` database (this may take several minutes...):
 
-         - camel-persistence-part2/data/csv-one-record-allok.txt to $JBOSS_FUSE_HOME/datainsert --> record written in table, new message on registerCall queue
-         - camel-persistence-part2/data/csv-one-record-failjms-dbok.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
-         - camel-persistence-part2/data/csv-one-record-jmsok-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
-         - camel-persistence-part2/data/csv-one-record-failjms-faildb.txt to $JBOSS_FUSE_HOME/datainsert --> NO record written in table, NO new message on registerCall queue
+        db2inst1@2286a6283768:~$ db2 create database reportdb automatic storage yes
+        DB20000I  The CREATE DATABASE command completed successfully.
 
-# Idempotent example
+7. DB2 delegates authentication of users to operating system. We have to create Linux user (as `root`):
 
-1. Cd idempotent
-2. Execute mvn camel:run
-3. Start H2 console and connect to the DB using the following parameters
-       Driver class = org.h2.Driver
-       JDBC URL : jdbc:h2:tcp://localhost/~/idempotentReport
-       User name : sa
-       Password :
-4. Enter the following request to verify that no records have been inserted
-       SELECT * FROM CAMEL_MESSAGEPROCESSED
-5. Copy the following file
-       cp ../data/csv-one-record.txt datainsert/
-6. The exchange is not filtered out and camel logs that
-       %%% File receive -> csv-one-record.txt
-7. Shutdown the camel route and restart
-       Verify after copying the file that the camel route will not display the following message
-       %%% File receive -> csv-one-record.txt
+        root@2286a6283768:/tmp/db2_conf# useradd fuse
+        root@2286a6283768:/tmp/db2_conf# passwd fuse
+        Enter new UNIX password: fuse
+        Retype new UNIX password: fuse
+        passwd: password updated successfully
 
-# Aggregator example
+8. Now we have to grand `DBADM` role to `reportdb` database for `fuse` user (as `db2inst1`):
 
-1. Cd aggregator
-2. Start H2 console and connect to the DB using the following parameters
-       Driver class = org.h2.Driver
-       JDBC URL : jdbc:h2:tcp://localhost/~/aggregationReport
-       User name : sa
-       Password :
-3. Create the DB using script in directory src/main/resources/sql/init.sql
-4. Execute mvn camel:run
-5. Shutdown camel when 2-3 exchanges have been aggregated
+        db2inst1@2286a6283768:~$ db2 connect to reportdb
 
-       >>> (file-to-queue) from(timer://demo?period=2000&repeatCount=15) --> ref:users method: getUser <<< Pattern:InOnly, Headers:{firedTime=Wed Nov 23 11:38:51 CET 2011, breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-2}, BodyType:null, Body:[Body is null]
-       >>> (file-to-queue) ref:users method: getUser --> aggregate <<< Pattern:InOnly, Headers:{firedTime=Wed Nov 23 11:38:51 CET 2011, breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-2, id=FUSE}, BodyType:String, Body:Charles,
-       >>> (file-to-queue) from(timer://demo?period=2000&repeatCount=15) --> ref:users method: getUser <<< Pattern:InOnly, Headers:{breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-5, firedTime=Wed Nov 23 11:38:53 CET 2011}, BodyType:null, Body:[Body is null]
-       >>> (file-to-queue) ref:users method: getUser --> aggregate <<< Pattern:InOnly, Headers:{firedTime=Wed Nov 23 11:38:53 CET 2011, id=FUSE, breadcrumbId=ID-biker-chm-local-53796-1322044729997-0-5}, BodyType:String, Body:Raul,
+           Database Connection Information
 
-6. Verify that a blob object exist in the DB
-       SELECT * FROM AGGREGATIONREPO1
-7. Restart camel route and verify that aggregation process continues
+         Database server        = DB2/LINUXX8664 10.5.5
+         SQL authorization ID   = DB2INST1
+         Local database alias   = REPORTDB
 
+        db2inst1@2286a6283768:~$ db2 grant dbadm on database to user fuse
+        DB20000I  The SQL command completed successfully.
 
+9. Initialize database `reportdb` by creating schema, table and populating the table with data.
 
+    Simply run:
 
+        $ cd $PROJECT_HOME/datasource
+        $ mvn -Pdb2
 
+    This will produce standard Maven output with single information:
+
+        [INFO] --- exec-maven-plugin:1.3.2:java (default-cli) @ datasource ---
+        14:21:50.169 INFO  [o.j.f.e.p.t.DbInsert] : Database db2 initialized successfully
+
+10. Your DB2 database is ready to use.
+
+If you have problems connecting to your DB2 database and receive *DB2 JCC Driver error: Unexpected Throwable caught: null. ERRORCODE=-4228, SQLSTATE=null*, please
+consult the solution [on IBM website](5).
+
+# JBoss Fuse installation and configuration
+
+# Examples
+
+## Camel route with 2 transaction managers
+
+## Camel route with 1 global transaction manager
+
+## Idempotent example
+
+## Aggregator example
+
+[1]: http://www.h2database.com/html/main.html
+[2]: http://db.apache.org/derby/derby_downloads.html
+[3]: https://registry.hub.docker.com/_/postgres/
+[4]: https://registry.hub.docker.com/u/angoca/db2-instance/
+[5]: http://www-01.ibm.com/support/docview.wss?uid=swg21682878
+[6]: https://registry.hub.docker.com/u/wnameless/oracle-xe-11g/
+[7]: https://registry.hub.docker.com/_/mariadb/
