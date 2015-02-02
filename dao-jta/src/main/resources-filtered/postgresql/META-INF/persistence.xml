@@ -30,7 +30,14 @@
         <properties>
             <property name="openjpa.jdbc.SynchronizeMappings" value="validate(SchemaAction='none')" />
             <property name="openjpa.Log" value="DefaultLevel=TRACE, Runtime=TRACE, Tool=TRACE, SQL=TRACE" />
-            <property name="openjpa.jdbc.DBDictionary" value="postgres(useSchemaName=true)" />
+            <!--
+                without SupportsMultipleNontransactionalResultSets=false, OpenJPA will set autocommit=true on non-xa connection
+                from non-jta-data-source. This connection is needed for non-jta dataaccess (like schema verification or database metadata needed by OpenJPA)
+                and *is* enlisted in JTA transaction (using org.apache.geronimo.connector.outbound.LocalXAResource). Setting autocommit=true should be prevented,
+                otherwise we'll get (in case of PostgreSQL) "org.postgresql.util.PSQLException: Cannot commit when autoCommit is enabled."
+                This is an edge case during first invocation of EntityManager operation which creates actual transaction (like persist()).
+            -->
+            <property name="openjpa.jdbc.DBDictionary" value="postgres(SupportsMultipleNontransactionalResultSets=false)" />
             <property name="openjpa.jdbc.Schema" value="report" />
             <!-- OpenJPA should not mess with autocommit, isolation level, etc. -->
             <!-- JTA transaction manager will optimize for local (non-XA) transactions -->

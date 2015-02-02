@@ -126,6 +126,27 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <plugins>
+            <!-- Felix -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <version>${felix.bundle.plugin.version}</version>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>org.jboss.fuse.examples.persistence.part2.dao.Activator</Bundle-Activator>
+                        <Meta-Persistence>${persistence-file}</Meta-Persistence>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Import-Package>${osgi-import-pkg}</Import-Package>
+                        <Export-Package>${osgi-export-pkg}</Export-Package>
+                        <Private-Package>${osgi-private-pkg}</Private-Package>
+                        <DynamicImport-Package>${osgi-dynamic-pkg}</DynamicImport-Package>
+                        <Include-Resource>{maven-resources}</Include-Resource>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>

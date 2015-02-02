@@ -23,13 +23,26 @@
     <tx:enable-annotations>true</tx:enable-annotations>
 
     <bean id="incidentDao" class="org.jboss.fuse.examples.persistence.part2.dao.impl.IncidentDAOImpl">
+        <!--
+            The injected javax.persistence.EntityManager is of class org.apache.aries.jpa.container.context.transaction.impl.JTAEntityManager
+            which acts as wrapper for creating persistence context from true EntityManagerFactory (provided by OpenJPA, Hibernate or TopLink)
+            It is thread safe object, because it is created in the context of active transaction
+        -->
         <jpa:context property="entityManager" unitname="reportincident" type="TRANSACTION" />
+        <!--
+            The transaction is started by org.apache.aries.transaction.TxInterceptorImpl wrapping
+            invocations of all the methods annotated with <tx:transaction />
+        -->
         <tx:transaction method="saveIncident" value="Required" />
         <tx:transaction method="removeIncident" value="Required" />
         <tx:transaction method="*" value="Supports" />
     </bean>
 
     <!-- Expose DAO as a OSGI Service for Camel Route -->
-    <service ref="incidentDao" interface="org.jboss.fuse.examples.persistence.part2.dao.IncidentDAO" />
+    <service ref="incidentDao" interface="org.jboss.fuse.examples.persistence.part2.dao.IncidentDAO">
+        <service-properties>
+            <entry key="kind" value="dao-jta" />
+        </service-properties>
+    </service>
 
 </blueprint>

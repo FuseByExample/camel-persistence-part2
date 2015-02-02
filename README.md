@@ -297,7 +297,7 @@ The correct way of using dockerized DB2 server would be to create child Dockerfi
         Retype new UNIX password: fuse
         passwd: password updated successfully
 
-8. Now we have to grand `DBADM` role to `reportdb` database for `fuse` user (as `db2inst1`):
+8. Now we have to grant `DBADM` role to `reportdb` database for `fuse` user (as `db2inst1`):
 
         db2inst1@2286a6283768:~$ db2 connect to reportdb
 
