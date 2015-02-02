@@ -1,18 +1,18 @@
 <!--
 
-    Copyright 2005-2015 Red Hat, Inc.
+     Copyright 2005-2015 Red Hat, Inc.
 
-    Red Hat licenses this file to you under the Apache License, version
-    2.0 (the "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+     Red Hat licenses this file to you under the Apache License, version
+     2.0 (the "License"); you may not use this file except in compliance
+     with the License.  You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-    implied.  See the License for the specific language governing
-    permissions and limitations under the License.
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+     implied.  See the License for the specific language governing
+     permissions and limitations under the License.
 
 -->
 # Description
@@ -329,6 +329,31 @@ consult the solution [on IBM website](http://www-01.ibm.com/support/docview.wss?
 
 # JBoss Fuse installation and configuration
 
+1. Unzip the `jboss-fuse-full-6.2.0.redhat-060.zip` archive distribution. The target directory `jboss-fuse-6.2.0.redhat-060` will
+    be referred to as `$JBOSS_FUSE_HOME`.
+2. Add the following credentials to `$JBOSS_FUSE_HOME/etc/users.properties`:
+
+        admin=admin,admin,manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser
+
+3. Start JBoss Fuse:
+
+        $JBOSS_FUSE_HOME/bin/fuse
+
+4. Make sure only one `transaction` bundle is installed:
+
+        JBossFuse:karaf@root> osgi:list -t 0 -s | grep transaction
+        [ 163] [Active     ] [            ] [       ] [   30] org.apache.aries.transaction.manager (1.1.0)
+        [ 164] [Active     ] [Created     ] [       ] [   30] org.apache.aries.transaction.blueprint (1.0.1)
+        [ 190] [Active     ] [            ] [       ] [   50] org.apache.aries.transaction.manager (1.0.0)
+
+    If the above is the case, please uninstall all versions except `1.1.0`:
+
+        JBossFuse:karaf@root> osgi:uninstall 190
+        You are about to access system bundle 190.  Do you wish to continue (yes/no): yes
+
+    (This problem should be fixed in the next version of JBoss Fuse 6.2)
+
+
 # Examples
 
 ## Camel route with 2 transaction managers
@@ -341,25 +366,53 @@ This example is comprised of the following projects:
 
 Ensure you have installed and configured a database server of choice (currently: PostgreSQL)
 
-## Camel route with 1 global transaction manager
+1. `cd $PROJECT_HOME`
+2. `mvn clean install -Ppostgresql` (or other DB, like `mariadb`, `h2`, `derby`, `db2`, `oracle`)
+3. install features repository:
 
-This example is comprised of the following projects:
+        features:addurl mvn:org.jboss.fuse.examples.camel-persistence-part2/features/6.2/xml/features
 
-* `datasource`
-* `dao-jta`
-* `route-one-tx-manager`
+4. install `reportincident-jpa-two` feature:
 
-Ensure you have installed and configured a database server of choice (currently: PostgreSQL)
+        features:install -v reportincident-jpa-two
 
-To install and test, assuming that you have previously run the "Camel Route with 2 Tx Managers" example above:
+5. make sure relevant bundles are installed:
 
-1. First uninstall the reportincident-jpa-two feature (TODO)
+        JBossFuse:karaf@root> list | grep Examples
+        [ 309] [Active     ] [Created     ] [       ] [   80] JBoss Fuse :: Examples :: Fuse ESB & Persistence :: Datasource (6.2.0)
+        [ 310] [Active     ] [Created     ] [       ] [   80] JBoss Fuse :: Examples :: Fuse ESB & Persistence :: DAO (6.2.0)
+        [ 311] [Active     ] [Created     ] [       ] [   80] JBoss Fuse :: Examples :: Fuse ESB & Persistence :: Camel - 2 Tx Managers (6.2.0)
 
-2. Install the reportincident-jpa-one feature (TODO)
+6. Start PostgreSQL client and observe `REPORT.T_INCIDENT` table:
 
-3. Execute the "list" command in the ESB shell and check that the following bundles are Active (TODO)
+        $ docker exec -ti fuse-postgresql-server /bin/bash
+        root@b052efff5a53:/# psql -d reportdb -U fuse
+        psql (9.4.0)
+        Type "help" for help.
 
-4. Copy the following files to `$JBOSS_FUSE_HOME/datainsert` and notice the new behaviour in the second and third cases, in terms of the registerCall queue and the REPORT.T_INCIDENT table:
+        reportdb=# select * from report.t_incident order by incident_id asc;
+         incident_id | incident_ref |    incident_date    | given_name | family_name |       summary        |                  details                  |           email           |     phone      |      creation_date      | creation_user
+        -------------+--------------+---------------------+------------+-------------+----------------------+-------------------------------------------+---------------------------+----------------+-------------------------+---------------
+                   1 | 001          | 2015-01-23 00:00:00 | Charles    | Moulliard   | incident webinar-001 | This is a report incident for webinar-001 | cmoulliard@fusesource.com | +111 10 20 300 |                         |
+                   2 | 002          | 2015-01-24 00:00:00 | Charles    | Moulliard   | incident webinar-002 | This is a report incident for webinar-002 | cmoulliard@fusesource.com | +111 10 20 300 |                         |
+                   3 | 003          | 2015-01-25 00:00:00 | Charles    | Moulliard   | incident webinar-003 | This is a report incident for webinar-003 | cmoulliard@fusesource.com | +111 10 20 300 |                         |
+                   4 | 004          | 2015-01-26 00:00:00 | Charles    | Moulliard   | incident webinar-004 | This is a report incident for webinar-004 | cmoulliard@fusesource.com | +111 10 20 300 |                         |
+        (5 rows)
+
+        reportdb=#
+
+7. Launch JConsole (inside $JAVA_HOME/bin) and connect using the following information:
+
+    * Remote process: `service:jmx:rmi://localhost:44444/jndi/rmi://localhost:1099/karaf-root`
+    * Username: `admin`
+    * Password: `admin`
+
+8. Switch to the MBeans tab at the top. On the left pane, expand the `org.apache.activemq` domain, then
+    navigate to: Broker > amq > Queue. You will see the `incident` and `rollback` queues. The `registerCall`
+    queue will appear when it is first used. For these queues, you will be interested in tracking the
+    `EnqueueCount` attribute.
+
+9. Copy the following files to `$JBOSS_FUSE_HOME/datainsert` and notice the effect in the `registerCall` queue and the `REPORT.T_INCIDENT` table:
 
     * `$PROJECT_HOME/data/csv-one-record-allok.txt`:
         * `REPORT.T_INCIDENT` table: new record
@@ -373,14 +426,67 @@ To install and test, assuming that you have previously run the "Camel Route with
         * `rollback` queue: no new messages
         * `registerCall` queue: no new messages
 
+    * `$PROJECT_HOME/data/csv-one-record-jmsok-faildb.txt`:
+        * `REPORT.T_INCIDENT` table: no record inserted
+        * `incident` queue: no new messages
+        * `rollback` queue: new message enqueued
+        * `registerCall` queue: new message enqueued
+
     * `$PROJECT_HOME/data/csv-one-record-failjms-faildb.txt`:
-        * `REPORT.T_INCIDENT` table: new record
+        * `REPORT.T_INCIDENT` table: no record inserted
         * `incident` queue: no new messages
         * `rollback` queue: new message enqueued
         * `registerCall` queue: no new messages
 
-    * `$PROJECT_HOME/data/csv-one-record-jmsok-faildb.txt`:
+## Camel route with 1 global transaction manager
+
+This example is comprised of the following projects:
+
+* `datasource`
+* `dao-jta`
+* `route-one-tx-manager`
+
+Ensure you have installed and configured a database server of choice (currently: PostgreSQL)
+
+To install and test, assuming that you have previously run the "Camel Route with 2 Tx Managers" example above:
+
+1. First uninstall the `reportincident-jpa-two` feature:
+
+        features:uninstall reportincident-jpa-two
+
+2. Install the reportincident-jpa-one feature:
+
+        features:install -v reportincident-jpa-one
+
+3. make sure relevant bundles are installed:
+
+        JBossFuse:karaf@root> list | grep Examples
+        [ 314] [Active     ] [Created     ] [       ] [   80] FuseSource :: Examples :: Fuse ESB & Persistence :: Datasource (6.2.0)
+        [ 315] [Active     ] [Created     ] [       ] [   80] FuseSource :: Examples :: Fuse ESB & Persistence :: DAO - JTA (6.2.0)
+        [ 316] [Active     ] [Created     ] [       ] [   80] FuseSource :: Examples :: Fuse ESB & Persistence :: Camel - 1 Tx Manager (6.2.0)
+
+4. Copy the following files to `$JBOSS_FUSE_HOME/datainsert` and notice the new behaviour in the second and third cases, in terms of the registerCall queue and the REPORT.T_INCIDENT table:
+
+    * `$PROJECT_HOME/data/csv-one-record-allok.txt`:
         * `REPORT.T_INCIDENT` table: new record
+        * `incident` queue: new message enqueued
+        * `rollback` queue: no new messages
+        * `registerCall` queue: new message enqueued
+
+    * `$PROJECT_HOME/data/csv-one-record-failjms-dbok.txt`:
+        * `REPORT.T_INCIDENT` table: no record inserted
+        * `incident` queue: new message enqueued
+        * `rollback` queue: no new messages
+        * `registerCall` queue: no new messages
+
+    * `$PROJECT_HOME/data/csv-one-record-jmsok-faildb.txt`:
+        * `REPORT.T_INCIDENT` table: no record inserted
+        * `incident` queue: no new messages
+        * `rollback` queue: new message enqueued
+        * `registerCall` queue: no new messages
+
+    * `$PROJECT_HOME/data/csv-one-record-failjms-faildb.txt`:
+        * `REPORT.T_INCIDENT` table: no record inserted
         * `incident` queue: no new messages
         * `rollback` queue: new message enqueued
         * `registerCall` queue: no new messages

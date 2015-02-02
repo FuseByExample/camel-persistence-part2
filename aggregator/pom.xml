@@ -28,7 +28,7 @@
 
     <groupId>com.fusesource.examples.camel-persistence-part2</groupId>
     <artifactId>aggregator</artifactId>
-    <name>FuseSource :: Examples :: Fuse ESB &amp; Persistence :: Camel - Aggregator</name>
+    <name>JBoss Fuse :: Examples :: Fuse ESB &amp; Persistence :: Camel - Aggregator</name>
 
     <dependencies>
         <dependency>

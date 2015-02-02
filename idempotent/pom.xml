@@ -29,7 +29,7 @@
 
     <groupId>com.fusesource.examples.camel-persistence-part2</groupId>
     <artifactId>idempotent</artifactId>
-    <name>FuseSource :: Examples :: Fuse ESB &amp; Persistence :: Camel - Idempotent</name>
+    <name>JBoss Fuse :: Examples :: Fuse ESB &amp; Persistence :: Camel - Idempotent</name>
 
     <dependencies>
         <dependency>

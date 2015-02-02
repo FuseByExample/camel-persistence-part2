@@ -1,77 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2011 FuseSource
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  -->
-<features>
+
+     Copyright 2005-2015 Red Hat, Inc.
+
+     Red Hat licenses this file to you under the Apache License, version
+     2.0 (the "License"); you may not use this file except in compliance
+     with the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+     implied.  See the License for the specific language governing
+     permissions and limitations under the License.
+
+-->
+<features name="camel-persistence-part2-${project.version}">
+
     <feature name="reportincident-jpa-two" version="${project.version}">
-        <feature version='${camel-version}'>camel-bindy</feature>
-        <feature version='${camel-version}'>camel-jpa</feature>
-        <feature version='${activemq-version}'>activemq</feature>
-        <feature>http</feature>
-        <feature>jdbc-driver-h2</feature>
+        <feature version="${feature.camel.version}">camel-bindy</feature>
+        <feature version="${feature.camel.version}">camel-jpa</feature>
+        <feature version="${feature.activemq.version}">activemq</feature>
+        <feature>jdbc-driver-${database}</feature>
         <feature>jndi</feature>
-        <feature>transaction</feature>
-        <feature>jpa</feature>
-        <feature version='${spring-version}'>spring-persistence</feature>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/1.6.8_1</bundle>
-        <bundle>mvn:com.fusesource.examples.camel-persistence-part2/datasource/${project.version}</bundle>
-        <bundle>mvn:com.fusesource.examples.camel-persistence-part2/dao/${project.version}</bundle>
-        <bundle>mvn:com.fusesource.examples.camel-persistence-part2/route-two-tx-manager/${project.version}</bundle>
+        <feature version="${feature.transaction.version}">transaction</feature>
+        <feature version="${feature.connector.version}">connector</feature>
+        <feature version="${feature.openjpa.version}">openjpa</feature>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.jboss.fuse.examples.camel-persistence-part2/datasource/${project.version}</bundle>
+        <bundle>mvn:org.jboss.fuse.examples.camel-persistence-part2/dao/${project.version}</bundle>
+        <bundle>mvn:org.jboss.fuse.examples.camel-persistence-part2/route-two-tx-managers/${project.version}</bundle>
     </feature>
 
     <feature name="reportincident-jpa-one" version="${project.version}">
-        <feature version='${camel-version}'>camel-bindy</feature>
-        <feature version='${camel-version}'>camel-jpa</feature>
-        <feature version='${activemq-version}'>activemq</feature>
-        <feature>http</feature>
-        <feature>jdbc-driver-h2</feature>
+        <feature version="${feature.camel.version}">camel-bindy</feature>
+        <feature version="${feature.camel.version}">camel-jpa</feature>
+        <feature version="${feature.activemq.version}">activemq</feature>
+        <feature>jdbc-driver-${database}</feature>
         <feature>jndi</feature>
-        <feature>transaction</feature>
-        <feature>jpa</feature>
-        <feature version='${spring-version}'>spring-persistence</feature>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/1.6.8_1</bundle>
-        <bundle>mvn:com.fusesource.examples.camel-persistence-part2/datasource/${project.version}</bundle>
-        <bundle>mvn:com.fusesource.examples.camel-persistence-part2/dao-jta/${project.version}</bundle>
-        <bundle>mvn:com.fusesource.examples.camel-persistence-part2/route-one-tx-manager/${project.version}</bundle>
+        <feature version="${feature.transaction.version}">transaction</feature>
+        <feature version="${feature.connector.version}">connector</feature>
+        <feature version="${feature.openjpa.version}">openjpa</feature>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.jboss.fuse.examples.camel-persistence-part2/datasource/${project.version}</bundle>
+        <bundle>mvn:org.jboss.fuse.examples.camel-persistence-part2/dao-jta/${project.version}</bundle>
+        <bundle>mvn:org.jboss.fuse.examples.camel-persistence-part2/route-one-tx-manager/${project.version}</bundle>
     </feature>
 
-    <feature name="spring-persistence" version="${spring-version}">
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring-version}_1</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring-version}_1</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aspects/${spring-version}_1</bundle>
+    <!-- DB driver features - chosen by maven filter from profile (e.g., -Ppostgresql) -->
+
+    <feature name="jdbc-driver-postgresql" version="${project.version}">
+        <bundle>wrap:mvn:org.postgresql/postgresql/${jdbc.postgresql.version}</bundle>
+        <!-- should be part of "transaction/3.1.1" feature -->
+        <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.jdbc/${aries.transaction.jdbc.version}</bundle>
+        <bundle>mvn:org.apache.commons/commons-pool2/${commons.pool2.version}</bundle>
+        <bundle>mvn:org.apache.commons/commons-dbcp2/${commons.dbcp2.version}</bundle>
     </feature>
 
-    <feature name="jdbc-driver-hsqldb" version="${hsqldb-version}">
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.2.2_1</bundle>
-        <bundle>mvn:org.apache.commons/commons-pool2/2.2</bundle>
-        <bundle>mvn:org.apache.commons/commons-dbcp2/2.0</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.hsqldb/1.8.0.10_1</bundle>
-    </feature>
-
-    <feature name="jdbc-driver-h2" version="${h2-version}">
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.2.2_1</bundle>
-        <bundle>mvn:org.apache.commons/commons-pool2/2.2</bundle>
-        <bundle>wrap:mvn:com.experlog/xapool/1.5.0$Import-Package=org.h2,oracle.jdbc.xa;resolution:=optional,oracle.jdbc.xa.client;resolution:=optional,org.enhydra.instantdb.jdbc;resolution:=optional,*</bundle>
-        <bundle>mvn:org.apache.commons/commons-dbcp2/2.0</bundle>
-        <bundle>mvn:org.osgi/org.osgi.compendium/4.3.1</bundle>
-        <bundle>mvn:com.h2database/h2/${h2-version}</bundle>
-    </feature>
-
-    <feature name="openjpa" version="${openjpa-version}">
-        <bundle>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/1.1</bundle>
-        <bundle>mvn:org.apache.commons/commons-dbcp2/2.0</bundle>
-        <bundle>mvn:org.apache.openjpa/openjpa/${openjpa-version}</bundle>
-    </feature>
 </features>
