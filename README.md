@@ -333,6 +333,16 @@ consult the solution [on IBM website](http://www-01.ibm.com/support/docview.wss?
 
 ## Camel route with 2 transaction managers
 
+This example is comprised of the following projects:
+
+* `datasource`
+* `dao`
+* `route-two-tx-managers`
+
+Ensure you have installed and configured a database server of choice (currently: PostgreSQL)
+
+TODO: describe the example
+
 ## Camel route with 1 global transaction manager
 
 ## Idempotent example

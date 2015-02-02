@@ -21,7 +21,7 @@
         xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
         version="2.0">
 
-    <persistence-unit name="reportincident" transaction-type="JTA">
+    <persistence-unit name="reportincidentxa" transaction-type="JTA">
         <jta-data-source>osgi:service/jdbc/reportdbxa</jta-data-source>
         <!-- e.g. to verify schema -->
         <non-jta-data-source>osgi:service/jdbc/reportdb</non-jta-data-source>

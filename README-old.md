@@ -71,6 +71,7 @@ N.B.: You may safely disregard the openjpa.Runtime Warning if it appears.
 6. Launch JConsole (inside $JAVA_HOME/bin) and connect to the local process named "org.apache.karaf.main.Main". Switch to the MBeans tab at the top.
        On the left pane, expand the org.apache.activemq domain, then navigate to: amq > Queue. You will see the `incident` and `rollback` queues.
        The `registerCall` queue will appear when it is first used. For these queues, you will be interested in tracking the EnqueueCount attribute.
+       service:jmx:rmi://localhost:44444/jndi/rmi://localhost:1099/karaf-root
 
 7. Copy the following files and notice the effect in the `registerCall` queue and the `REPORT.T_INCIDENT` table:
 

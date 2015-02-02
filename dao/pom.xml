@@ -37,7 +37,8 @@
         <database />
         <persistence-file>META-INF/persistence.xml</persistence-file>
         <osgi-import-pkg>
-            *
+            *,
+            org.apache.openjpa.util
         </osgi-import-pkg>
         <osgi-export-pkg>
             org.jboss.fuse.examples.persistence.part2.model,

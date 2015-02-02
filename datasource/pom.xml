@@ -68,7 +68,7 @@
             <!--</exclusions>-->
         <!--</dependency>-->
 
-        <!-- Aries -->
+        <!-- Aries (for debugging) -->
 
         <dependency>
             <groupId>org.apache.aries.transaction</groupId>
