@@ -26,6 +26,8 @@ import org.jboss.fuse.examples.persistence.part2.model.Incident;
 
 public class ProcessIncidents {
 
+    private static int counter = 0;
+
     private IncidentDAO incidentDAO;
 
     public Incident extract(Exchange exchange) throws ParseException {
@@ -44,9 +46,9 @@ public class ProcessIncidents {
     }
 
     public void generateError() throws Exception {
-        Thread.sleep(2000);
-        // and now generate an exception to rollback TX
-        throw new Exception("%%% Database has crashed ....");
+        System.out.println("%%% ERROR GENERATED %%% - " + counter + " times.");
+        counter++;
+        throw new Exception("Cannot connect to Database ....");
     }
 
     public IncidentDAO getIncidentDAO() {

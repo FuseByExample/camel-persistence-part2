@@ -30,10 +30,10 @@
 
     <modules>
         <module>datasource</module>
-        <module>dao</module>
-        <!--<module>dao-jta</module>-->
+        <!--<module>dao</module>-->
+        <module>dao-jta</module>
         <module>route-two-tx-managers</module>
-        <!--<module>route-one-tx-manager</module>-->
+        <module>route-one-tx-manager</module>
         <!--<module>features</module>-->
         <!--<module>idempotent</module>-->
         <!--<module>aggregator</module>-->

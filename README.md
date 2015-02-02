@@ -341,9 +341,49 @@ This example is comprised of the following projects:
 
 Ensure you have installed and configured a database server of choice (currently: PostgreSQL)
 
-TODO: describe the example
-
 ## Camel route with 1 global transaction manager
+
+This example is comprised of the following projects:
+
+* `datasource`
+* `dao-jta`
+* `route-one-tx-manager`
+
+Ensure you have installed and configured a database server of choice (currently: PostgreSQL)
+
+To install and test, assuming that you have previously run the "Camel Route with 2 Tx Managers" example above:
+
+1. First uninstall the reportincident-jpa-two feature (TODO)
+
+2. Install the reportincident-jpa-one feature (TODO)
+
+3. Execute the "list" command in the ESB shell and check that the following bundles are Active (TODO)
+
+4. Copy the following files to `$JBOSS_FUSE_HOME/datainsert` and notice the new behaviour in the second and third cases, in terms of the registerCall queue and the REPORT.T_INCIDENT table:
+
+    * `$PROJECT_HOME/data/csv-one-record-allok.txt`:
+        * `REPORT.T_INCIDENT` table: new record
+        * `incident` queue: new message enqueued
+        * `rollback` queue: no new messages
+        * `registerCall` queue: new message enqueued
+
+    * `$PROJECT_HOME/data/csv-one-record-failjms-dbok.txt`:
+        * `REPORT.T_INCIDENT` table: new record
+        * `incident` queue: new message enqueued
+        * `rollback` queue: no new messages
+        * `registerCall` queue: no new messages
+
+    * `$PROJECT_HOME/data/csv-one-record-failjms-faildb.txt`:
+        * `REPORT.T_INCIDENT` table: new record
+        * `incident` queue: no new messages
+        * `rollback` queue: new message enqueued
+        * `registerCall` queue: no new messages
+
+    * `$PROJECT_HOME/data/csv-one-record-jmsok-faildb.txt`:
+        * `REPORT.T_INCIDENT` table: new record
+        * `incident` queue: no new messages
+        * `rollback` queue: new message enqueued
+        * `registerCall` queue: no new messages
 
 ## Idempotent example
 

@@ -28,7 +28,7 @@
             which acts as wrapper for creating persistence context from true EntityManagerFactory (provided by OpenJPA, Hibernate or TopLink)
             It is thread safe object, because it is created in the context of active transaction
         -->
-        <jpa:context property="entityManager" unitname="reportincident" type="TRANSACTION" />
+        <jpa:context property="entityManager" unitname="reportincidentxa" type="TRANSACTION" />
         <!--
             The transaction is started by org.apache.aries.transaction.TxInterceptorImpl wrapping
             invocations of all the methods annotated with <tx:transaction />

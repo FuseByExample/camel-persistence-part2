@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2005-2015 Red Hat, Inc.
+
+    Red Hat licenses this file to you under the Apache License, version
+    2.0 (the "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+    implied.  See the License for the specific language governing
+    permissions and limitations under the License.
+
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.4.0"
+        xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <!-- TM -->
+
+    <!-- plain javax.transaction.TransactionManager is not enough to do recovery for ActiveMQ -->
+    <reference id="jtaTxManager" interface="org.apache.geronimo.transaction.manager.RecoverableTransactionManager" />
+    <!-- aries-transaction-manager registers this interface if it finds the org.springframework.transaction.PlatformTransactionManager class  -->
+    <reference id="springJtaTxManager" interface="org.springframework.transaction.PlatformTransactionManager" />
+
+    <!-- ActiveMQ -->
+
+    <!-- XA connection factory -->
+    <bean id="activeMqXaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616" />
+        <property name="userName" value="admin" />
+        <property name="password" value="admin" />
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0" />
+            </bean>
+        </property>
+    </bean>
+    <!-- non-XA connection factory -->
+    <bean id="activeMqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616" />
+        <property name="userName" value="admin" />
+        <property name="password" value="admin" />
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0" />
+            </bean>
+        </property>
+    </bean>
+
+    <!-- XA pool -->
+    <bean id="jmsXaPoolConnectionFactory" class="org.apache.activemq.pool.JcaPooledConnectionFactory">
+        <property name="name" value="activemq.default" />
+        <property name="maxConnections" value="1" />
+        <property name="transactionManager" ref="jtaTxManager" />
+        <property name="connectionFactory" ref="activeMqXaConnectionFactory" />
+    </bean>
+    <!-- non-XA pool -->
+    <bean id="jmsPoolConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+        <property name="maxConnections" value="1" />
+        <property name="connectionFactory" ref="activeMqConnectionFactory" />
+    </bean>
+
+    <!-- wires ActiveMQ broker and Geronimo transaction manager -->
+    <bean id="resourceManager" class="org.apache.activemq.jms.pool.GenericResourceManager" init-method="recoverResource">
+        <property name="transactionManager" ref="jtaTxManager" />
+        <property name="connectionFactory" ref="jmsXaPoolConnectionFactory" />
+        <property name="resourceName" value="activemq.default" />
+        <property name="userName" value="admin" />
+        <property name="password" value="admin" />
+    </bean>
+
+    <!-- Camel -->
+
+    <!-- ActiveMQ JMS Configuration is defined as Transacted and use global JTA TxManager -->
+    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="configuration">
+            <bean class="org.apache.camel.component.jms.JmsConfiguration">
+                <property name="connectionFactory" ref="jmsXaPoolConnectionFactory" />
+                <!-- JTA transaction manager (Spring interface to Aries-TM): -->
+                <property name="transactionManager" ref="springJtaTxManager" />
+                <!-- We set local transactions to false, because the JtaTransactionManager will take care of enrolling the XA JMS Connection when needed. -->
+                <property name="transacted" value="false" />
+                <property name="cacheLevelName" value="CACHE_NONE" />
+            </bean>
+        </property>
+    </bean>
+
+    <!-- ActiveMQ JMS Configuration for Non Transactional Exchanges (inter route communication) -->
+    <bean id="activemqNoXA" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="configuration">
+            <bean class="org.apache.camel.component.jms.JmsConfiguration">
+                <property name="connectionFactory" ref="jmsPoolConnectionFactory" />
+                <property name="transacted" value="false" />
+                <property name="cacheLevelName" value="CACHE_NONE" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="JTA_TRANSACTION" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+        <property name="transactionManager" ref="springJtaTxManager" />
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED" />
+    </bean>
+
+    <reference id="incidentDAO" interface="org.jboss.fuse.examples.persistence.part2.dao.IncidentDAO" filter="(kind=dao-jta)" />
+
+    <bean id="processIncident" class="org.jboss.fuse.examples.persistence.part2.ProcessIncidents">
+        <property name="incidentDAO" ref="incidentDAO" />
+    </bean>
+
+    <!-- Initialise an Exception to throw it later on -->
+    <bean id="myRandomException" class="java.lang.Exception">
+        <argument index="0" value="Random JMS exception" />
+    </bean>
+
+    <camelContext xmlns="http://camel.apache.org/schema/blueprint">
+
+        <dataFormats>
+            <bindy id="csvReport" type="Csv" packages="org.jboss.fuse.examples.persistence.part2.model" />
+        </dataFormats>
+
+        <route id="file-to-queue">
+            <from uri="file:datainsert?moveFailed=failed" />
+            <unmarshal ref="csvReport" />
+            <split>
+                <simple>${body}</simple>
+                <bean ref="processIncident" method="extract" />
+                <choice>
+                    <when>
+                        <simple>${file:onlyname} contains 'faildb'</simple>
+                        <!-- Using the activemqNoXA component, which does *not* use a backing XASession -->
+                        <to uri="activemqNoXA:queue:rollback" />
+                    </when>
+                    <otherwise>
+                        <!-- Using the activemqNoXA component, which does *not* use a backing XASession -->
+                        <to uri="activemqNoXA:queue:incident" />
+                    </otherwise>
+                </choice>
+                <log message=">>> Incident created in queue: ${body}" />
+            </split>
+        </route>
+
+        <route id="queue-create-incident">
+            <description>Route that successfully creates an incident.</description>
+            <!-- receive from non-XA queue, because we're doing inter-route communication, not business processing -->
+            <from uri="activemqNoXA:queue:incident" />
+            <transacted ref="JTA_TRANSACTION" />
+            <multicast parallelProcessing="false" stopOnException="true">
+                <to uri="direct:registerCall" />
+                <pipeline>
+                    <log message=">>> Incident received: ${body}" />
+                    <bean ref="processIncident" method="saveReport" />
+                    <log message=">>> Record inserted: ${body}" />
+                </pipeline>
+            </multicast>
+        </route>
+
+        <route id="queue-rollback-incident">
+            <description>Route that creates an incident and then throws an exception to trigger a rollback.</description>
+            <!-- receive from non-XA queue, because we're doing inter-route communication, not business processing -->
+            <from uri="activemqNoXA:queue:rollback" />
+            <!-- PROPAGATION_REQUIRED means we're using the same transaction here and in "registerCall" route -->
+            <transacted ref="JTA_TRANSACTION" />
+            <multicast parallelProcessing="false" stopOnException="true">
+                <to uri="direct:registerCall" />
+                <pipeline>
+                    <log message=">>> Incident received: ${body}" />
+                    <bean ref="processIncident" method="saveReport" />
+                    <log message=">>>>>> Throwing exception from Rollback Incident branch!" />
+                    <bean ref="processIncident" method="generateError" />
+                    <log message=">>> Record inserted: ${body}" />
+                </pipeline>
+            </multicast>
+        </route>
+
+        <route id="registerCall">
+            <description>This route sends an auditing message to a queue. It reuses the same Transaction Policy as above, backed by the JTA Transaction Manager.</description>
+            <from uri="direct:registerCall" />
+            <transacted ref="JTA_TRANSACTION" />
+            <transform>
+                <simple>Registering ${exchangeId}</simple>
+            </transform>
+            <to uri="activemq:queue:registerCall" />
+            <!-- fail, if the filename contains the 'failjms' token -->
+            <filter>
+                <simple>${file:onlyname} contains 'failjms'</simple>
+                <log message=">>>>>> Throwing exception from Register Call branch!" />
+                <throwException ref="myRandomException" />
+            </filter>
+        </route>
+
+    </camelContext>
+
+</blueprint>

@@ -17,59 +17,86 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>com.fusesource.examples</groupId>
-      <artifactId>camel-persistence-part2</artifactId>
-      <version>1.0</version>
+        <groupId>org.jboss.fuse.examples</groupId>
+        <artifactId>camel-persistence-part2</artifactId>
+        <version>6.2</version>
     </parent>
 
-    <groupId>com.fusesource.examples.camel-persistence-part2</groupId>
+    <groupId>org.jboss.fuse.examples.camel-persistence-part2</groupId>
     <artifactId>route-one-tx-manager</artifactId>
-    <name>FuseSource :: Examples :: Fuse ESB &amp; Persistence :: Camel - 1 Tx Manager</name>
     <packaging>bundle</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.fusesource.examples.camel-persistence-part2</groupId>
-            <artifactId>dao-jta</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-client</artifactId>
-        </dependency>
-         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-pool</artifactId>
-        </dependency>
-         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-camel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
-        </dependency>
-    </dependencies>
+    <name>FuseSource :: Examples :: Fuse ESB &amp; Persistence :: Camel - 1 Tx Manager</name>
 
     <properties>
-        <osgi-import-pkg>
-            com.fusesource.examples.persistence.part2.dao,
-            com.fusesource.examples.persistence.part2.model,
-            org.apache.camel,
-            org.h2,
-            *
-        </osgi-import-pkg>
-        <osgi-export-pkg/>
-        <osgi-private-pkg>
-            com.fusesource.examples.persistence.part2
-        </osgi-private-pkg>
-        <osgi-dynamic-pkg/>
+        <database />
+        <osgi-import-pkg>*</osgi-import-pkg>
+        <osgi-export-pkg>
+            org.jboss.fuse.examples.persistence.part2
+        </osgi-export-pkg>
     </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.jboss.fuse.examples.camel-persistence-part2</groupId>
+            <artifactId>dao-jta</artifactId>
+            <version>6.2</version>
+        </dependency>
+
+        <!-- ActiveMQ (for debugging) -->
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-osgi</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Aries (for debugging) -->
+
+        <dependency>
+            <groupId>org.apache.aries.transaction</groupId>
+            <artifactId>org.apache.aries.transaction.manager</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.components</groupId>
+            <artifactId>geronimo-connector</artifactId>
+            <version>3.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Camel -->
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jms</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spring -->
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+        </dependency>
+
+    </dependencies>
+
 </project>
