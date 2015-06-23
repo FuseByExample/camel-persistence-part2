@@ -43,12 +43,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- versions of dependencies -->
-        <jboss.fuse.bom.version>6.2.0.redhat-060</jboss.fuse.bom.version>
+        <jboss.fuse.bom.version>6.2.0.redhat-133</jboss.fuse.bom.version>
         <slf4j.version>1.7.10</slf4j.version>
         <logback.version>1.1.2</logback.version>
-        <karaf.version>2.4.0.redhat-620058</karaf.version>
-        <camel.version>2.14.0.redhat-620060</camel.version>
-        <activemq.version>5.10.0.redhat-620065</activemq.version>
+        <karaf.version>2.4.0.redhat-620133</karaf.version>
+        <camel.version>2.15.1.redhat-620133</camel.version>
+        <activemq.version>5.11.0.redhat-620133</activemq.version>
         <!--<commons.dbcp2.version>2.0.1</commons.dbcp2.version>-->
         <!--<commons.lang.version>2.6</commons.lang.version>-->
         <!--<openjpa.version>2.3.0</openjpa.version>-->
@@ -91,7 +91,7 @@
     </properties>
 
     <!-- Add FUSE repositories for snaphots and releases -->
-    <!--pluginRepositories>
+    <pluginRepositories>
         <pluginRepository>
             <id>fusesource.releases</id>
             <name>FuseSource Release Repository</name>
@@ -138,19 +138,7 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
-        <repository>
-            <id>Maven-repo</id>
-            <url>http://repo1.maven.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>Spring-external-repo</id>
-            <url>http://repository.springsource.com/maven/bundles/external</url>
-        </repository>
-        <repository>
-            <id>Spring-release-repo</id>
-            <url>http://repository.springsource.com/maven/bundles/release</url>
-        </repository>
-    </repositories-->
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
