@@ -15,6 +15,9 @@
      permissions and limitations under the License.
 
 -->
+NOTE: This project is not supported on JBoss Fuse version 6.3 or later
+
+
 # Description
 
 This is the material accompanying the presentation of webinar part II - Transaction Management with Fuse ESB, Camel and Persistent EIPs.
